@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLANCO — תפריט</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:wght@700;800&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #FAFAF7;
+  --text: #1A1A1A;
+  --gold: #8B6914;
+  --gold-accent: #C9A84C;
+  --card-bg: #FFFFFF;
+  --card-border: rgba(180,145,60,0.15);
+  --nav-active-bg: #1A1A1A;
+  --nav-active-text: #FAFAF7;
+  --muted: #6B6B6B;
+  --ph: linear-gradient(145deg,#f2ead8,#e4d4b2);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Assistant', sans-serif;
+  direction: rtl;
+  text-align: right;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* HEADER */
+.site-header { text-align: center; padding: 56px 24px 32px; }
+
+.logo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  font-size: clamp(3rem,9vw,5.5rem);
+  letter-spacing: 0.06em;
+  color: var(--text);
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.logo-tagline {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 300;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.header-divider {
+  width: 60px; height: 1px;
+  background: linear-gradient(90deg,transparent,var(--gold-accent),transparent);
+  margin: 20px auto 0;
+}
+
+/* NAV */
+.sticky-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,250,247,0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(201,168,76,0.2);
+  transition: border-color .3s ease, box-shadow .3s ease;
+  padding: 12px 0;
+}
+
+.sticky-nav.scrolled {
+  box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+  border-bottom-color: rgba(201,168,76,0.35);
+}
+
+.nav-pills {
+  display: flex;
+  gap: 8px;
+  padding: 4px 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-pills::-webkit-scrollbar { display: none; }
+
+.nav-pill {
+  flex-shrink: 0;
+  font-family: 'Assistant', sans-serif;
+  font-weight: 500;
+  font-size: 0.82rem;
+  padding: 7px 16px;
+  border-radius: 50px;
+  border: 1px solid rgba(180,145,60,0.3);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: all .25s ease;
+  white-space: nowrap;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-pill:hover { background: rgba(139,105,20,0.07); border-color: var(--gold-accent); color: var(--gold); }
+.nav-pill.active { background: var(--nav-active-bg); color: var(--nav-active-text); border-color: var(--nav-active-bg); }
+
+/* MAIN */
+main { max-width: 780px; margin: 0 auto; padding: 40px 16px 80px; }
+
+/* SECTION */
+.menu-section { margin-bottom: 56px; }
+.section-header { margin-bottom: 24px; }
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.7rem,5vw,2.2rem);
+  color: var(--gold);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(to left,var(--gold-accent),rgba(201,168,76,0.1));
+  border: none;
+}
+
+/* GRID */
+.items-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+@media (min-width: 560px) {
+  .items-grid { grid-template-columns: repeat(2,1fr); gap: 16px; }
+}
+
+/* ─── CARD — mobile-first: horizontal ───
+   DOM order: .card-body FIRST → RIGHT in RTL row
+              .card-img-wrap SECOND → LEFT in RTL row          */
+.menu-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  transition: all .3s ease;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  overflow: hidden;
+  position: relative;
+}
+
+.menu-card::before {
+  content: '';
+  position: absolute; top: 0; right: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(180deg,var(--gold-accent),transparent);
+  opacity: 0; transition: opacity .3s ease; z-index: 2;
+}
+
+.menu-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.09); border-color: rgba(180,145,60,0.35); }
+.menu-card:hover::before { opacity: 1; }
+
+/* Card body — RIGHT on mobile (DOM first in RTL row) */
+.card-body {
+  flex: 1;
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Card image — LEFT on mobile (DOM second in RTL row) */
+.card-img-wrap {
+  flex-shrink: 0;
+  width: 90px;
+  min-height: 90px;
+  position: relative;
+  background: var(--ph);
+  overflow: hidden;
+}
+
+/* Placeholder icon */
+.card-img-wrap::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c9a84c' stroke-width='1.3' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='7'/%3E%3Cpath d='M9 12h6M12 9v6'/%3E%3C/svg%3E")
+    center / 30px no-repeat;
+  opacity: 0.28;
+}
+
+.card-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  display: block;
+}
+
+/* Hide img element when no src set — gradient placeholder shows instead */
+.card-img:not([src]) { display: none; }
+
+/* ─── TABLET (560px+): vertical cards — image on TOP ─── */
+@media (min-width: 560px) {
+  .menu-card { flex-direction: column; }
+
+  .card-img-wrap {
+    order: 1;           /* TOP in column */
+    width: 100%;
+    height: 160px;
+    min-height: unset;
+  }
+
+  .card-body {
+    order: 2;           /* BOTTOM in column */
+    padding: 16px;
+  }
+
+  /* Wide cards stay horizontal on tablet too */
+  .menu-card.wide { flex-direction: row; }
+  .menu-card.wide .card-img-wrap { order: 0; width: 130px; height: auto; min-height: 100px; }
+  .menu-card.wide .card-body    { order: 0; }
+}
+
+.menu-card.wide { grid-column: 1 / -1; }
+
+/* CARD TEXT */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.item-name {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 700;
+  font-size: 0.96rem;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.item-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--gold);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.item-desc {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 400;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.item-note {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 500;
+  font-size: 0.76rem;
+  color: var(--gold);
+}
+
+.price-row { display: flex; gap: 14px; flex-wrap: wrap; }
+
+.price-variant {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+
+/* FOOTER */
+footer {
+  text-align: center;
+  padding: 32px 24px 40px;
+  border-top: 1px solid var(--card-border);
+  margin-top: 16px;
+}
+
+.footer-logo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  margin-bottom: 8px;
+}
+
+.footer-note {
+  font-family: 'Assistant', sans-serif;
+  font-weight: 300;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+/* SCROLL TOP */
+.scroll-top {
+  position: fixed; bottom: 28px; left: 20px;
+  width: 42px; height: 42px;
+  background: var(--text); color: var(--bg);
+  border: none; border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transform: translateY(12px);
+  transition: all .3s ease;
+  pointer-events: none;
+  font-size: 1rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  z-index: 200;
+}
+.scroll-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.scroll-top:hover { background: var(--gold); }
+
+/* RESPONSIVE */
+@media (max-width: 400px) {
+  .nav-pill { font-size: 0.76rem; padding: 6px 12px; }
+  main { padding: 32px 12px 64px; }
+  .card-img-wrap { width: 78px; }
+  .card-body { padding: 12px 12px 10px; }
+}
+
+@media (min-width: 780px) {
+  main { padding: 48px 24px 80px; }
+}
+
+/* Section fade-in */
+.menu-section {
+  opacity: 0;
+  transform: translateY(18px);
+  animation: fadeUp .55s ease forwards;
+}
+.menu-section:nth-child(1)  { animation-delay: .05s; }
+.menu-section:nth-child(2)  { animation-delay: .10s; }
+.menu-section:nth-child(3)  { animation-delay: .15s; }
+.menu-section:nth-child(4)  { animation-delay: .20s; }
+.menu-section:nth-child(5)  { animation-delay: .25s; }
+.menu-section:nth-child(6)  { animation-delay: .30s; }
+.menu-section:nth-child(7)  { animation-delay: .35s; }
+.menu-section:nth-child(8)  { animation-delay: .40s; }
+.menu-section:nth-child(9)  { animation-delay: .45s; }
+.menu-section:nth-child(10) { animation-delay: .50s; }
+
+@keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+/* LIGHTBOX */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(0,0,0,0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.lightbox-img {
+  max-width: 100%;
+  max-height: 90dvh;
+  border-radius: 10px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  transform: scale(0.92);
+  transition: transform 0.3s ease;
+  object-fit: contain;
+  display: block;
+}
+
+.lightbox.open .lightbox-img {
+  transform: scale(1);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.lightbox-close:hover { background: rgba(255,255,255,0.28); }
+
+/* Clickable images get a cursor hint */
+.card-img[src] { cursor: zoom-in; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="logo">BLANCO</div>
+  <div class="logo-tagline">Coffee &nbsp;•&nbsp; Food &nbsp;•&nbsp; Sweets</div>
+  <div class="header-divider"></div>
+</header>
+
+<nav class="sticky-nav" id="stickyNav">
+  <div class="nav-pills" id="navPills">
+    <button class="nav-pill active" data-target="breakfast">ארוחות בוקר</button>
+    <button class="nav-pill" data-target="salads">בטבע</button>
+    <button class="nav-pill" data-target="sandwiches">כריכים</button>
+    <button class="nav-pill" data-target="mains">עיקריות</button>
+    <button class="nav-pill" data-target="snacks">חטיפים</button>
+    <button class="nav-pill" data-target="mezazak">מזאז׳ק</button>
+    <button class="nav-pill" data-target="pasta">פינה מרומא</button>
+    <button class="nav-pill" data-target="kids">ילדים</button>
+    <button class="nav-pill" data-target="mezze">מזות</button>
+    <button class="nav-pill" data-target="specials">מיוחדים</button>
+  </div>
+</nav>
+
+<!-- To add images: set the src attribute on any .card-img element to your image path.
+     Example: <img class="card-img" src="images/shakshouka.jpg" alt="..."> -->
+
+<main id="menuMain">
+
+  <!-- ══ ארוחות בוקר ══ -->
+  <section class="menu-section" id="breakfast">
+    <div class="section-header">
+      <h2 class="section-title">ארוחות בוקר</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card wide">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">בוקר זוגי בלאנקו</span>
+            <span class="item-price">₪155</span>
+          </div>
+          <p class="item-desc">חוויה זוגית מושלמת לפתיחת היום. ביצים לבחירה, מבחר מטבלים מובחרים, סלט שוק טרי ולחם הבית החם.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="בוקר זוגי בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">בוקר בלאנקו / יחיד</span>
+            <span class="item-price">₪79</span>
+          </div>
+          <p class="item-desc">הבוקר שלך, בסטנדרט שלנו. ביצים לבחירה, מבחר מטבלים מובחרים, סלט שוק טרי ולחם הבית החם.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="בוקר בלאנקו יחיד" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">שקשוקה בלאנקו</span>
+            <span class="item-price">₪75</span>
+          </div>
+          <p class="item-desc">עגבניות בבישול איטי, תיבול מדויק וביצים רכות במרכז. מוגשת עם 3 סוגי מטבלים מובחרים, סלט טרי ולחם הבית. מוגש עם מיץ טבעי סחוט ומשקה חם לבחירה.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="שקשוקה בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">קרואסון בלאנקו ספיישל</span>
+            <span class="item-price">₪65</span>
+          </div>
+          <p class="item-desc">קרואסון חמאה צרפתי פריך, במילוי פסטו טרי, ממרח בלאנקו וירקות רעננים, עם סלמון מעושן איכותי. מוגש עם 3 סוגי מטבלים מובחרים. מוגש עם לימונדה קרה ומשקה חם לבחירה.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="קרואסון בלאנקו ספיישל" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ בלאנקו בטבע ══ -->
+  <section class="menu-section" id="salads">
+    <div class="section-header">
+      <h2 class="section-title">בלאנקו בטבע</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">סלט קיסר בלאנקו</span>
+            <span class="item-price">₪59</span>
+          </div>
+          <p class="item-desc">מיקס חסה צבעים, קרוטונים מוזהבים, רוטב קיסר עשיר ופטריות טריות, עם פרמזן וצנוברים.</p>
+          <p class="item-note">תוספת חזה עוף ₪12</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="סלט קיסר בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">סלט חלומי צרובה</span>
+            <span class="item-price">₪69</span>
+          </div>
+          <p class="item-desc">ירקות שוק צבעוניים, גבינת חלומי צרובה מושלמת עם פטריות ואגוזי מלך בטעם אסייאתי.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="סלט חלומי צרובה" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">סלט טוסט בלאנקו</span>
+            <span class="item-price">₪75</span>
+          </div>
+          <p class="item-desc">מיקס ירקות מרענן בטעם פסטו, קוביות טוסט ביגל ממולא גבינות. פשוט, מדויק, ממכר.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="סלט טוסט בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">טאבולה בלאנקו</span>
+            <span class="item-price">₪59</span>
+          </div>
+          <p class="item-desc">מוגש עם גבינת פטה מוקצפת ורימונים טריים. איזון מדויק של רעננות ועומק.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="טאבולה בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card wide">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">פתוש בלאנקו</span>
+            <span class="item-price">₪69</span>
+          </div>
+          <p class="item-desc">עלים, מלפפון ועגבנייה טריים, קרוטונים בניחוח סומאק וזעתר, עם גבינה ובודוק קלוי. טעמים יסתיכוניים בנגיעה מודרנית.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="פתוש בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ כריכים מפנקים ══ -->
+  <section class="menu-section" id="sandwiches">
+    <div class="section-header">
+      <h2 class="section-title">כריכים מפנקים</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך חלומי צרובה</span>
+            <span class="item-price">₪45</span>
+          </div>
+          <p class="item-desc">גבינת חלומי צרובה, ירקות טריים, ממרח בלאנקו ופסטו / אבוקדו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך חלומי צרובה" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך בייקון פרימיום</span>
+            <span class="item-price">₪55</span>
+          </div>
+          <p class="item-desc">בייקון איכותי, ירקות טריים, ממרח בלאנקו ופסטו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך בייקון פרימיום" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך שניצל קריספי</span>
+            <span class="item-price">₪45</span>
+          </div>
+          <p class="item-desc">שניצל עוף פריך, ירקות טריים וממרח בלאנקו ופסטו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך שניצל קריספי" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך חביתה קלאסית</span>
+            <span class="item-price">₪45</span>
+          </div>
+          <p class="item-desc">חביתה אוורירית, ירקות טריים וממרח לבנה / אבוקדו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך חביתה קלאסית" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך Fitness</span>
+            <span class="item-price">₪45</span>
+          </div>
+          <p class="item-desc">מוגש בג׳בתה דגנים עם טונה וביצה קשה, ירקות טריים וממרח בלאנקו ופסטו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך Fitness" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך בלאנקו</span>
+            <span class="item-price">₪45</span>
+          </div>
+          <p class="item-desc">מבחר גבינות ונקניקים איכותיים, ירקות טריים וממרח בלאנקו ופסטו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">טוסט ארבע עונות</span>
+            <span class="item-price">₪49</span>
+          </div>
+          <p class="item-desc">שילוב גבינות עשיר ומעודן עם פטריות טריות ופסטו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="טוסט ארבע עונות" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">טוסט משולב</span>
+            <span class="item-price">₪49</span>
+          </div>
+          <p class="item-desc">שילוב גבינות ונקניקים עם פטריות טריות ופסטו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="טוסט משולב" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ עיקריות בלאנקו ══ -->
+  <section class="menu-section" id="mains">
+    <div class="section-header">
+      <h2 class="section-title">עיקריות בלאנקו</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">חזה עוף</span>
+            <span class="item-price">₪86</span>
+          </div>
+          <p class="item-desc">בטעם איטלקי עדין.</p>
+          <p class="item-note">לבחירה: ריזוטו / רביולי בטטה / צ׳יפס</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="חזה עוף" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">סלמון</span>
+            <span class="item-price">₪109</span>
+          </div>
+          <p class="item-desc">צרוב במחבת בנגיעות עשבי תיבול.</p>
+          <p class="item-note">לבחירה: ריזוטו / רביולי בטטה / צ׳יפס</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" src="images/salmon.jpg" alt="סלמון" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">שרימפס</span>
+            <span class="item-price">₪105</span>
+          </div>
+          <p class="item-desc">מטוגן / ברוטב שום לימון.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="שרימפס" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">קלמארי</span>
+            <span class="item-price">₪95</span>
+          </div>
+          <p class="item-desc">מטוגן / ברוטב שום לימון.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="קלמארי" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">מקס פירות ים</span>
+            <span class="item-price">₪105</span>
+          </div>
+          <p class="item-desc">מטוגן / ברוטב שום לימון.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="מקס פירות ים" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ חטיפים ══ -->
+  <section class="menu-section" id="snacks">
+    <div class="section-header">
+      <h2 class="section-title">חטיפים</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">הום פריייז בלאנקו</span>
+            <span class="item-price">₪35</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="הום פריייז בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כדורי פירה</span>
+            <span class="item-price">₪35</span>
+          </div>
+          <p class="item-desc">בציפוי זהוב עדין.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כדורי פירה" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">אצבעות מוצרלה</span>
+            <span class="item-price">₪45</span>
+          </div>
+          <p class="item-desc">קריספיות ונמסות.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="אצבעות מוצרלה" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">צ׳יפס</span>
+          </div>
+          <div class="price-row">
+            <span class="price-variant">גדול ₪30</span>
+            <span class="price-variant">קטן ₪15</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="צ׳יפס" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ ע מזאז׳ק ══ -->
+  <section class="menu-section" id="mezazak">
+    <div class="section-header">
+      <h2 class="section-title">ע מזאז׳ק</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">שניצל פריך עם צ׳יפס</span>
+            <span class="item-price">₪69</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="שניצל פריך עם צ׳יפס" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">קורדון בלו</span>
+            <span class="item-price">₪109</span>
+          </div>
+          <p class="item-desc">עוף ממולא גבינות, עם רוטב שמנת חרדל עדין ומאוזן.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="קורדון בלו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">מטוגני חמאתי</span>
+            <span class="item-price">₪39</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="מטוגני חמאתי" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">קרפצ׳יו בקר</span>
+            <span class="item-price">₪79</span>
+          </div>
+          <p class="item-desc">פרוסות דקות של בשר מובחר בתיבול עדין של בלסמי, פרמזן, בפרזנטציה אלגנטית.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="קרפצ׳יו בקר" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">ג׳בטה עוף מוקרם</span>
+            <span class="item-price">₪65</span>
+          </div>
+          <p class="item-desc">רצועות עוף ברוטב שמנת פטריות ופסטו.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="ג׳בטה עוף מוקרם" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">בורגר קריספי</span>
+            <span class="item-price">₪45</span>
+          </div>
+          <p class="item-desc">עוף קריספי עסיסי בלחמנייה בוטיק.</p>
+          <p class="item-note">תוספת גבינת צ׳דר ₪5 | תוספת בייקון ₪10</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="בורגר קריספי" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ פינה מרומא ══ -->
+  <section class="menu-section" id="pasta">
+    <div class="section-header">
+      <h2 class="section-title">פינה מרומא</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">לינגוויני</span>
+            <span class="item-price">₪69</span>
+          </div>
+          <p class="item-desc">ברוטב לבחירה: שמנת פטריות / רוזה / נפוליטנה.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="לינגוויני" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">רביולי</span>
+            <span class="item-price">₪69</span>
+          </div>
+          <p class="item-desc">במילוי גבינה או בטטה, ברוטב שמנת פטריות.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="רביולי" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">פסטה סלמון</span>
+            <span class="item-price">₪85</span>
+          </div>
+          <p class="item-desc">קוביות סלמון ברוטב שמנת לימון.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="פסטה סלמון" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">פסטה Seafood</span>
+            <span class="item-price">₪85</span>
+          </div>
+          <p class="item-desc">עם פירות ים ברוטב שמנת לימון.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="פסטה Seafood" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ מנות ילדים ══ -->
+  <section class="menu-section" id="kids">
+    <div class="section-header">
+      <h2 class="section-title">מנות ילדים</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">שניצלונים</span>
+            <span class="item-price">₪35</span>
+          </div>
+          <p class="item-desc">מוגש לצד צ׳יפס פריך.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="שניצלונים" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך נקניקיות צ׳דר</span>
+            <span class="item-price">₪25</span>
+          </div>
+          <p class="item-desc">בלחם טרי.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך נקניקיות צ׳דר" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">בורגר קריספי</span>
+            <span class="item-price">₪35</span>
+          </div>
+          <p class="item-desc">מוגש עם צ׳יפס.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="בורגר קריספי ילדים" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">יווני ילדים</span>
+            <span class="item-price">₪15</span>
+          </div>
+          <p class="item-desc">מרקם עדין, נגיעה מתוקה.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="יווני ילדים" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ מזות ══ -->
+  <section class="menu-section" id="mezze">
+    <div class="section-header">
+      <h2 class="section-title">מזות</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">מזה בלאנקו</span>
+            <span class="item-price">₪55</span>
+          </div>
+          <p class="item-note">תוספת קוויאר ₪20</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="מזה בלאנקו" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">פוקצ׳ה שום</span>
+            <span class="item-price">₪19</span>
+          </div>
+          <p class="item-desc">אפויה במקום, בנגיעות שמן זית.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="פוקצ׳ה שום" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">אדממי מלוח</span>
+            <span class="item-price">₪35</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="אדממי מלוח" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">קלמארי עם לבנה חריפה</span>
+            <span class="item-price">₪75</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="קלמארי עם לבנה חריפה" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card wide">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">הום פרייז עוף צ׳ילי</span>
+            <span class="item-price">₪55</span>
+          </div>
+          <p class="item-desc">שילוב קראנץ׳ מעודן.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="הום פרייז עוף צ׳ילי" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══ מיוחדים ══ -->
+  <section class="menu-section" id="specials">
+    <div class="section-header">
+      <h2 class="section-title">מיוחדים</h2>
+      <hr class="section-divider">
+    </div>
+    <div class="items-grid">
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">מוקפץ טיוואן</span>
+            <span class="item-price">₪49</span>
+          </div>
+          <p class="item-desc">ירקות אסיאתיים בטעם פיקנטי-מתוק.</p>
+          <p class="item-note">תוספות: חזה עוף / רצועות פילה / סינטה לבן — ₪19</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="מוקפץ טיוואן" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">כריך פילה</span>
+            <span class="item-price">₪55</span>
+          </div>
+          <p class="item-desc">מוגש עם ירקות ובצל בטעם צ׳ימיצ׳ורי.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="כריך פילה" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">מדליון פילה אנגוס</span>
+            <span class="item-price">₪149</span>
+          </div>
+          <p class="item-desc">בטעם ארגנטינאי.</p>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="מדליון פילה אנגוס" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">חתן לבן – סינטה לבן</span>
+            <span class="item-price">₪119</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="חתן לבן – סינטה לבן" loading="lazy">
+        </div>
+      </div>
+
+      <div class="menu-card">
+        <div class="card-body">
+          <div class="card-top">
+            <span class="item-name">צלעות לבן בטעם השף</span>
+            <span class="item-price">₪119</span>
+          </div>
+        </div>
+        <div class="card-img-wrap">
+          <img class="card-img" alt="צלעות לבן בטעם השף" loading="lazy">
+        </div>
+      </div>
+
+    </div>
+    <p style="margin-top:20px;font-family:'Assistant',sans-serif;font-size:0.82rem;color:var(--muted);line-height:1.6;padding-right:4px;">
+      כל המנות מוגשות לבחירה על מצע: פירה / רביולי / ריזוטו
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="footer-logo">BLANCO</div>
+  <p class="footer-note">המחירים כוללים מע״מ · אנא עדכנו את הצוות על אלרגיות</p>
+</footer>
+
+<button class="scroll-top" id="scrollTopBtn" aria-label="חזרה למעלה">↑</button>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="תצוגת תמונה מוגדלת">
+  <button class="lightbox-close" id="lightboxClose" aria-label="סגור">✕</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="">
+</div>
+
+<script>
+(function () {
+  var nav       = document.getElementById('stickyNav');
+  var pills     = document.querySelectorAll('.nav-pill');
+  var sections  = document.querySelectorAll('.menu-section');
+  var scrollBtn = document.getElementById('scrollTopBtn');
+  var pillsEl   = document.getElementById('navPills');
+
+  pills.forEach(function (pill) {
+    pill.addEventListener('click', function () {
+      var target = document.getElementById(pill.dataset.target);
+      if (!target) return;
+      var top = target.getBoundingClientRect().top + window.pageYOffset - nav.offsetHeight - 12;
+      window.scrollTo({ top: top, behavior: 'smooth' });
+    });
+  });
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      var id = entry.target.id;
+      pills.forEach(function (p) { p.classList.toggle('active', p.dataset.target === id); });
+      var active = pillsEl.querySelector('.nav-pill[data-target="' + id + '"]');
+      if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+    });
+  }, { rootMargin: '-' + (nav.offsetHeight + 20) + 'px 0px -55% 0px', threshold: 0 });
+
+  sections.forEach(function (s) { observer.observe(s); });
+
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      nav.classList.toggle('scrolled', window.pageYOffset > 40);
+      scrollBtn.classList.toggle('visible', window.pageYOffset > 320);
+      ticking = false;
+    });
+  }, { passive: true });
+
+  scrollBtn.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // LIGHTBOX
+  var lightbox     = document.getElementById('lightbox');
+  var lightboxImg  = document.getElementById('lightboxImg');
+  var lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(src, alt) {
+    lightboxImg.src = src;
+    lightboxImg.alt = alt;
+    lightbox.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lightbox.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  // Click any loaded card image
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('card-img') && e.target.src) {
+      openLightbox(e.target.src, e.target.alt);
+    }
+  });
+
+  // Close on backdrop click (not on image itself)
+  lightbox.addEventListener('click', function (e) {
+    if (e.target !== lightboxImg) closeLightbox();
+  });
+
+  lightboxClose.addEventListener('click', closeLightbox);
+
+  // Close on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
+</script>
+</body>
+</html>
