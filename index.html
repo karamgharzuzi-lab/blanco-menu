@@ -38,23 +38,13 @@ body {
 /* HEADER */
 .site-header { text-align: center; padding: 56px 24px 32px; }
 
-.logo {
-  font-family: 'Playfair Display', serif;
-  font-weight: 800;
-  font-size: clamp(3rem,9vw,5.5rem);
-  letter-spacing: 0.06em;
-  color: var(--text);
-  line-height: 1;
-  margin-bottom: 10px;
-}
-
-.logo-tagline {
-  font-family: 'Assistant', sans-serif;
-  font-weight: 300;
-  font-size: 0.78rem;
-  letter-spacing: 0.22em;
-  color: var(--muted);
-  text-transform: uppercase;
+.logo-img {
+  max-width: clamp(180px, 45vw, 320px);
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  mix-blend-mode: multiply;
+  display: block;
 }
 
 .header-divider {
@@ -422,8 +412,7 @@ footer {
 <body>
 
 <header class="site-header">
-  <div class="logo">BLANCO</div>
-  <div class="logo-tagline">Coffee &nbsp;•&nbsp; Food &nbsp;•&nbsp; Sweets</div>
+  <img src="images/logo.png" alt="BLANCO Logo" class="logo-img">
   <div class="header-divider"></div>
 </header>
 
