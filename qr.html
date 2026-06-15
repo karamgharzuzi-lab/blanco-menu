@@ -71,24 +71,15 @@
       opacity: 0.6;
     }
 
-    .logo {
-      font-family: var(--font-logo);
-      font-size: 3.5rem;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      color: var(--text);
-      margin-bottom: 5px;
+    .logo-img {
+      max-width: 260px;
+      width: 100%;
+      height: auto;
+      margin-bottom: 25px;
+      mix-blend-mode: multiply;
+      display: block;
       position: relative;
-      display: inline-block;
-    }
-
-    .tagline {
-      font-family: var(--font-sans);
-      font-weight: 400;
-      font-size: 1rem;
-      letter-spacing: 0.05em;
-      color: var(--gold);
-      margin-bottom: 35px;
+      z-index: 2;
     }
 
     .qr-frame {
@@ -215,8 +206,7 @@
 <body>
 
   <div class="qr-container">
-    <div class="logo">BLANCO</div>
-    <div class="tagline">Coffee &nbsp;•&nbsp; Food &nbsp;•&nbsp; Sweets</div>
+    <img src="images/logo.jpg" alt="BLANCO" class="logo-img">
     
     <div class="qr-frame">
       <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://blanco-menu.vercel.app&color=1a1a1a&bgcolor=ffffff" alt="קוד לסריקת תפריט בלנקו">
