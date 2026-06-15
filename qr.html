@@ -6,7 +6,7 @@
   <title>BLANCO — קוד סריקה לתפריט</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Playfair+Display:wght@700;800&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #FAFAF7;
@@ -16,6 +16,7 @@
       --card-bg: #FFFFFF;
       --card-border: rgba(180,145,60,0.25);
       --font-serif: 'Cormorant Garamond', serif;
+      --font-logo: 'Playfair Display', serif;
       --font-sans: 'Assistant', sans-serif;
       --muted: #6B6B6B;
     }
@@ -71,26 +72,14 @@
     }
 
     .logo {
-      font-family: var(--font-serif);
-      font-size: 3rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
+      font-family: var(--font-logo);
+      font-size: 3.5rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
       color: var(--text);
       margin-bottom: 5px;
       position: relative;
       display: inline-block;
-      margin-right: 0.15em; /* Compensate for RTL letter-spacing spacing */
-    }
-
-    .logo::after {
-      content: '';
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background-color: var(--gold-accent);
-      border-radius: 50%;
-      bottom: 14px;
-      right: -10px;
     }
 
     .tagline {
@@ -227,7 +216,7 @@
 
   <div class="qr-container">
     <div class="logo">BLANCO</div>
-    <div class="tagline">בר אוכל וקוקטיילים</div>
+    <div class="tagline">Coffee &nbsp;•&nbsp; Food &nbsp;•&nbsp; Sweets</div>
     
     <div class="qr-frame">
       <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://blanco-menu.vercel.app&color=1a1a1a&bgcolor=ffffff" alt="קוד לסריקת תפריט בלנקו">
