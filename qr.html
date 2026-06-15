@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLANCO — קוד סריקה לתפריט</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Assistant:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FAFAF7;
+      --text: #1A1A1A;
+      --gold: #8B6914;
+      --gold-accent: #C9A84C;
+      --card-bg: #FFFFFF;
+      --card-border: rgba(180,145,60,0.25);
+      --font-serif: 'Cormorant Garamond', serif;
+      --font-sans: 'Assistant', sans-serif;
+      --muted: #6B6B6B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Screen view card container */
+    .qr-container {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      padding: 50px 30px 40px 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Elegant double border inside the card */
+    .qr-container::before {
+      content: '';
+      position: absolute;
+      top: 15px;
+      bottom: 15px;
+      left: 15px;
+      right: 15px;
+      border: 1px solid var(--gold-accent);
+      border-radius: 8px;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .logo {
+      font-family: var(--font-serif);
+      font-size: 3rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text);
+      margin-bottom: 5px;
+      position: relative;
+      display: inline-block;
+      margin-right: 0.15em; /* Compensate for RTL letter-spacing spacing */
+    }
+
+    .logo::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: var(--gold-accent);
+      border-radius: 50%;
+      bottom: 14px;
+      right: -10px;
+    }
+
+    .tagline {
+      font-family: var(--font-sans);
+      font-weight: 400;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      color: var(--gold);
+      margin-bottom: 35px;
+    }
+
+    .qr-frame {
+      background: #FFFFFF;
+      padding: 15px;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      margin-bottom: 35px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    .qr-code {
+      display: block;
+      width: 220px;
+      height: 220px;
+    }
+
+    .scan-instruction {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .scan-sub {
+      font-size: 0.88rem;
+      color: var(--muted);
+      max-width: 290px;
+      line-height: 1.6;
+    }
+
+    .camera-icon {
+      margin-top: 25px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Actions buttons for screen */
+    .actions {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      width: 100%;
+      max-width: 420px;
+      justify-content: center;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: var(--font-sans);
+    }
+
+    .btn-primary {
+      background-color: var(--text);
+      color: #FFFFFF;
+      border: 1px solid var(--text);
+    }
+
+    .btn-primary:hover {
+      background-color: #333333;
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(0,0,0,0.02);
+      transform: translateY(-2px);
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        min-height: auto !important;
+        padding: 0 !important;
+      }
+
+      .qr-container {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        padding: 60px 0 !important;
+        margin: 0 auto !important;
+      }
+
+      .qr-container::before {
+        border: 2px solid #000000 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        border-radius: 0 !important;
+      }
+
+      .actions {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="qr-container">
+    <div class="logo">BLANCO</div>
+    <div class="tagline">בר אוכל וקוקטיילים</div>
+    
+    <div class="qr-frame">
+      <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://blanco-menu.vercel.app&color=1a1a1a&bgcolor=ffffff" alt="קוד לסריקת תפריט בלנקו">
+    </div>
+    
+    <div class="scan-instruction">סרקו לצפייה בתפריט הדיגיטלי</div>
+    <div class="scan-sub">פתחו את המצלמה במכשיר הנייד שלכם והפנו אותה לקוד כדי לצפות במנות ובמחירים המעודכנים</div>
+    
+    <div class="camera-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 18C14.7614 18 17 15.7614 17 13C17 10.2386 14.7614 8 12 8C9.23858 8 7 10.2386 7 13C7 15.7614 9.23858 18 12 18Z" stroke="#8B6914" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M23 19C23 19.5304 22.7893 20.0391 22.4142 20.4142C22.0391 20.7893 21.5304 21 21 21H3C2.46957 21 1.96086 20.7893 1.58579 20.4142C1.21071 20.0391 1 19.5304 1 19V9C1 8.46957 1.21071 7.96086 1.58579 7.58579C1.96086 7.21071 2.46957 7 3 7H7L9 4H15L17 7H21C21.5304 7 22.0391 7.21071 22.4142 7.58579C22.7893 7.96086 23 8.46957 23 9V19Z" stroke="#8B6914" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="window.print()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform: scaleX(-1);">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+      </svg>
+      הדפסת כרטיס שולחן
+    </button>
+    <a href="index.html" class="btn btn-secondary">
+      חזרה לתפריט
+    </a>
+  </div>
+
+</body>
+</html>
