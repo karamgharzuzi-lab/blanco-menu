@@ -117,8 +117,28 @@
       line-height: 1.6;
     }
 
-    .camera-icon {
+    .disclaimer-text {
       margin-top: 25px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 2;
+      background: linear-gradient(135deg, var(--gold-accent), var(--gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      padding: 8px 12px;
+      border-top: 1px solid rgba(139, 105, 20, 0.15);
+      border-bottom: 1px solid rgba(139, 105, 20, 0.15);
+      width: 100%;
+      max-width: 290px;
+      text-align: center;
+      font-family: var(--font-sans);
+    }
+
+    .camera-icon {
+      margin-top: 15px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -200,6 +220,13 @@
       .actions {
         display: none !important;
       }
+
+      .disclaimer-text {
+        color: #000000 !important;
+        background: none !important;
+        -webkit-text-fill-color: initial !important;
+        border-color: #000000 !important;
+      }
     }
   </style>
 </head>
@@ -214,6 +241,8 @@
     
     <div class="scan-instruction">סרקו לצפייה בתפריט הדיגיטלי</div>
     <div class="scan-sub">פתחו את המצלמה במכשיר הנייד שלכם והפנו אותה לקוד כדי לצפות במנות ובמחירים המעודכנים</div>
+    
+    <div class="disclaimer-text">התמונות לא להמחשה זה באמת כך נראה :)</div>
     
     <div class="camera-icon">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
