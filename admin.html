@@ -552,7 +552,10 @@ function secTitle(k){ const s=SECTIONS.find(x=>x.key===k); return s?s.title:k; }
 $('#signInBtn').addEventListener('click', async ()=>{
   $('#loginErr').textContent='';
   try{ await signInWithEmailAndPassword(auth, $('#email').value.trim(), $('#password').value); }
-  catch(e){ $('#loginErr').textContent = 'כניסה נכשלה — בדוק אימייל וסיסמה.'; }
+  catch(e){ 
+    console.error(e);
+    $('#loginErr').textContent = 'כניסה נכשלה: ' + (e.code || e.message || 'שגיאה לא ידועה'); 
+  }
 });
 $('#password').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#signInBtn').click(); });
 $('#logoutBtn').addEventListener('click', ()=>signOut(auth));
