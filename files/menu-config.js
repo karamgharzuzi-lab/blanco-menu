@@ -13,7 +13,7 @@ export const firebaseConfig = {
   projectId:         "blan-76d34",
   storageBucket:     "blan-76d34.firebasestorage.app",
   messagingSenderId: "236971012667",
-  appId:             "1:236971012667:web:f5baccbe484b44914a21e"
+  appId:             "1:236971012667:web:f5baccbfe484b44914a21e"
 };
 
 // The menu sections, in display order. The 'key' must match the
