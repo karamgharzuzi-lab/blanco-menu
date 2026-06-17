@@ -8,7 +8,7 @@
 // ════════════════════════════════════════════════════════════════
 
 export const firebaseConfig = {
-  apiKey:            "AiZaSyDmZon8jjslscNdu1hjT-iT_sGPsV1AtI8",
+  apiKey:            "AIzaSyDmZon8jjslscNdu1hjT-iT_sGPsV1AtI8",
   authDomain:        "blan-76d34.firebaseapp.com",
   projectId:         "blan-76d34",
   storageBucket:     "blan-76d34.firebasestorage.app",
