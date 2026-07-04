@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLANCO · ניהול תפריט</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- LOGIN AREA -->
+  <div class="login-view" id="loginView">
+    <h1>BLANCO</h1>
+    <p>ניהול ועריכת תפריט דיגיטלי</p>
+    <input class="field" id="email" type="email" placeholder="אימייל" autocomplete="username">
+    <input class="field" id="password" type="password" placeholder="סיסמה" autocomplete="current-password">
+    <div class="err-msg" id="loginErr"></div>
+    <button class="btn" id="signInBtn" style="width:100%">כניסה למערכת</button>
+  </div>
+
+  <!-- EDITOR WORKSPACE -->
+  <div class="wrap hidden" id="adminView">
+    <div class="topbar">
+      <div>
+        <h1>ניהול תפריט</h1>
+        <p style="color: var(--text-muted); font-size: 0.82rem; margin-top: 4px;">צפה בסטטיסטיקות, ערוך מחירים, תיאורים, תגיות ותמונות מנות.</p>
+      </div>
+      <button class="btn ghost mini" id="logoutBtn">יציאה</button>
+    </div>
+
+    <!-- Analytics & Stats widgets panel -->
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <span class="stat-val" id="statDishes">0</span>
+        <span class="stat-lbl">מנות פעילות</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="statArchived">0</span>
+        <span class="stat-lbl">בארכיון</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="statPhotos">0%</span>
+        <span class="stat-lbl">כיסוי תמונות</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val" id="statVisits">0</span>
+        <span class="stat-lbl">כניסות לתפריט</span>
+      </div>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="toolbar-controls">
+      <div class="search-filter-box">
+        <input type="text" id="adminSearchInput" placeholder="חיפוש מנה...">
+        <select id="adminCategorySelect">
+          <option value="all">כל הקטגוריות</option>
+        </select>
+      </div>
+      <div>
+        <button class="btn mini" id="headerAddDishBtn">+ מנה חדשה</button>
+      </div>
+    </div>
+
+    <div id="editorRoot"></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script type="module">
+    import { firebaseConfig, SECTIONS } from './menu-config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import { getFirestore, collection, getDocs, addDoc, updateDoc, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-storage.js";
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Initial seed list of 50 dishes to seed database if empty
+    const SEED = [
+      {"section": "breakfast", "order": 0, "name": "בוקר זוגי בלאנקו", "price": "₪155", "desc": "חוויה זוגית מושלמת לפתיחת היום. ביצים לבחירה, מבחר מטבלים מובחרים, סלט שוק טרי ולחם הבית החם.", "note": "", "photo": "images/בוקר זוגי בלאנקו.jpg"},
+      {"section": "breakfast", "order": 1, "name": "בוקר בלאנקו / יחיד", "price": "₪79", "desc": "הבוקר שלך, בסטנדרט שלנו. ביצים לבחירה, מבחר מטבלים מובחרים, סלט שוק טרי ולחם הבית החם.", "note": "", "photo": "images/בוקר זוגי בלאנקו.jpg"},
+      {"section": "breakfast", "order": 2, "name": "שקשוקה בלאנקו", "price": "₪75", "desc": "עגבניות בבישול איטי, תיבול מדויק וביצים רכות במרכז. מוגשת עם 3 סוגי מטבלים מובחרים, סלט טרי ולחם הבית. מוגש עם מיץ טבעי סחוט ומשקה חם לבחירה.", "note": "", "photo": "images/שקשוקה בלאנקו.jpg"},
+      {"section": "breakfast", "order": 3, "name": "קרואסון בלאנקו ספיישל", "price": "₪65", "desc": "קרואסון חמאה צרפתי פריך, במילוי פסטו טרי, ממרח בלאנקו וירקות רעננים, עם סלמון מעושן איכותי. מוגש עם 3 סוגי מטבלים מובחרים. מוגש עם לימונדה קרה ומשקה חם לבחירה.", "note": "", "photo": "images/קרואסון בלאנקו ספיישל.jpg"},
+      {"section": "salads", "order": 0, "name": "סלט קיסר בלאנקו", "price": "₪59", "desc": "מיקס חסה צבעים, קרוטונים מוזהבים, רוטב קיסר עשיר ופטריות טריות, עם פרמזן וצנוברים.", "note": "תוספת חזה עוף ₪12", "photo": "images/סלט קיסר בלאנקו.jpg"},
+      {"section": "salads", "order": 1, "name": "סלט חלומי צרובה", "price": "₪69", "desc": "ירקות שוק צבעוניים, גבינת חלומי צרובה מושלמת עם פטריות ואגוזי מלך בטעם אסייאתי.", "note": "", "photo": "images/סלט חלומי צרובה.jpg"},
+      {"section": "salads", "order": 2, "name": "סלט טוסט בלאנקו", "price": "₪75", "desc": "מיקס ירקות מרענן בטעם פסטו, קוביות טוסט ביגל ממולא גבינות. פשוט, מדויק, ממכר.", "note": "", "photo": "images/סלט טוסט בלאנקו.jpg"},
+      {"section": "salads", "order": 3, "name": "טאבולה בלאנקו", "price": "₪59", "desc": "מוגש עם גבינת פטה מוקצפת ורימונים טריים. איזון מדויק של רעננות ועומק.", "note": "", "photo": "images/טאבולה בלאנקו.jpg"},
+      {"section": "salads", "order": 4, "name": "פתוש בלאנקו", "price": "₪69", "desc": "עלים, מלפפון ועגבנייה טריים, קרוטונים בניחוח סומאק וזעתר, עם גבינה ובודוק קלוי. טעמים יסתיכוניים בנגיעה מודרנית.", "note": "", "photo": "images/פתוש בלאנקו.jpg"},
+      {"section": "sandwiches", "order": 0, "name": "כריך חלומי צרובה", "price": "₪45", "desc": "גבינת חלומי צרובה, ירקות טריים, ממרח בלאנקו ופסטו / אבוקדו.", "note": "", "photo": "images/כריך חלומי צרובה.jpg"},
+      {"section": "sandwiches", "order": 1, "name": "כריך בייקון פרימיום", "price": "₪55", "desc": "בייקון איכותי, ירקות טריים, ממרח בלאנקו ופסטו.", "note": "", "photo": "images/כריך בייקון פרימיום.jpg"},
+      {"section": "sandwiches", "order": 2, "name": "כריך שניצל קריספי", "price": "₪45", "desc": "שניצל עוף פריך, ירקות טריים וממרח בלאנקו ופסטו.", "note": "", "photo": "images/כריך שניצל קריספי.jpg"},
+      {"section": "sandwiches", "order": 3, "name": "כריך חביתה קלאסית", "price": "₪45", "desc": "חביתה אוורירית, ירקות טריים וממרח לבנה / אבוקדו.", "note": "", "photo": ""},
+      {"section": "sandwiches", "order": 4, "name": "כריך Fitness", "price": "₪45", "desc": "מוגש בג׳בתה דגנים עם טונה וביצה קשה, ירקות טריים וממרח בלאנקו ופסטו.", "note": "", "photo": "images/כריך Fitness.jpg"},
+      {"section": "sandwiches", "order": 5, "name": "כריך בלאנקו", "price": "₪45", "desc": "מבחר גבינות ונקניקים איכותיים, ירקות טריים וממרח בלאנקו ופסטו.", "note": "", "photo": "images/כריך בלאנקו.jpg"},
+      {"section": "sandwiches", "order": 6, "name": "טוסט ארבע עונות", "price": "₪49", "desc": "שילוב גבינות עשיר ומעודן עם פטריות טריות ופסטו.", "note": "", "photo": "images/טוסט ארבע עונות.jpg"},
+      {"section": "sandwiches", "order": 7, "name": "טוסט משולב", "price": "₪49", "desc": "שילוב גבינות ונקניקים עם פטריות טריות ופסטו.", "note": "", "photo": "images/טוסט ארבע עונות.jpg"},
+      {"section": "sandwiches", "order": 8, "name": "כריך פילה", "price": "₪55", "desc": "מוגש עם ירקות ובצל בטעם צ׳ימיצ׳ורי.", "note": "", "photo": ""},
+      {"section": "mains", "order": 0, "name": "חזה עוף", "price": "₪86", "desc": "בטעם איטלקי עדין.", "note": "לבחירה: ריזוטו / רביולי בטטה / צ׳יפס", "photo": "images/חזה עוף.jpg"},
+      {"section": "mains", "order": 1, "name": "סלמון", "price": "₪109", "desc": "צרוב במחבת בנגיעות עשבי תיבול.", "note": "לבחירה: ריזוטו / רביולי בטטה / צ׳יפס", "photo": "images/salmon.jpg"},
+      {"section": "mains", "order": 2, "name": "שרימפס", "price": "₪105", "desc": "מטוגן / ברוטב שום לימון.", "note": "", "photo": ""},
+      {"section": "mains", "order": 3, "name": "קלמארי", "price": "₪95", "desc": "מטוגן / ברוטב שום לימון.", "note": "", "photo": ""},
+      {"section": "mains", "order": 4, "name": "מקס פירות ים", "price": "₪105", "desc": "מטוגן / ברוטב שום לימון.", "note": "", "photo": ""},
+      {"section": "mains", "order": 5, "name": "מדליון פילה אנגוס", "price": "₪149", "desc": "בטעם ארגנטינאי.", "note": "לבחירה על מצע: פירה / רביולי / ריזוטו", "photo": "images/מדליון פילה אנגוס.jpg"},
+      {"section": "mains", "order": 6, "name": "חתן לבן – סינטה לבן", "price": "₪119", "desc": "", "note": "לבחירה על מצע: פירה / רביולי / ריזוטו", "photo": ""},
+      {"section": "mains", "order": 7, "name": "צלעות לבן בטעם השף", "price": "₪119", "desc": "", "note": "לבחירה על מצע: פירה / רביולי / ריזוטו", "photo": "images/צלעות לבן בטעם השף.jpg"},
+      {"section": "snacks", "order": 0, "name": "הום פריייז בלאנקו", "price": "₪35", "desc": "", "note": "", "photo": "images/הום פריייז בלאנקו.jpg"},
+      {"section": "snacks", "order": 1, "name": "כדורי פירה", "price": "₪35", "desc": "בציפוי זהוב עדין.", "note": "", "photo": ""},
+      {"section": "snacks", "order": 2, "name": "אצבעות מוצרלה", "price": "₪45", "desc": "קריספיות ונמסות.", "note": "", "photo": ""},
+      {"section": "snacks", "order": 3, "name": "צ׳יפס", "price": "גדול ₪30 · קטן ₪15", "desc": "", "note": "", "photo": ""},
+      {"section": "mezazak", "order": 0, "name": "שניצל פריך עם צ׳יפס", "price": "₪69", "desc": "", "note": "", "photo": "images/שניצל פריך עם צ׳יפס.jpg"},
+      {"section": "mezazak", "order": 1, "name": "קורדון בלו", "price": "₪109", "desc": "עוף ממולא גבינות, עם רוטב שמנת חרדל עדין ומאוזן.", "note": "", "photo": "images/קורדון בלו.jpg"},
+      {"section": "mezazak", "order": 2, "name": "מטוגני חמאתי", "price": "₪39", "desc": "", "note": "", "photo": "images/מטוגני חמאתי.jpg"},
+      {"section": "mezazak", "order": 3, "name": "קרפצ׳יו בקר", "price": "₪79", "desc": "פרוסות דקות של בשר מובחר בתיבול עדין של בלסמי, פרמזן, בפרזנטציה אלגנטית.", "note": "", "photo": "images/קרפצ׳יו בקר.jpg"},
+      {"section": "mezazak", "order": 4, "name": "ג׳בטה עוף מוקרם", "price": "₪65", "desc": "רצועות עוף ברוטב שמנת פטריות ופסטו.", "note": "", "photo": "images/ג׳בטה עוף מוקרם.jpg"},
+      {"section": "mezazak", "order": 5, "name": "בורגר קריספי", "price": "₪45", "desc": "עוף קריספי עסיסי בלחמנייה בוטיק.", "note": "תוספת גבינת צ׳דר ₪5 | תוספת בייקון ₪10", "photo": "images/בורגר קריספי.jpg"},
+      {"section": "mezazak", "order": 6, "name": "מוקפץ טיוואן", "price": "₪49", "desc": "ירקות אסיאתיים בטעם פיקנטי-מתוק.", "note": "תוספות: חזה עוף / רצועות פילה / סינטה לבן — ₪19", "photo": "images/מוקפץ טיוואן.jpg"},
+      {"section": "pasta", "order": 0, "name": "לינגוויני", "price": "₪69", "desc": "ברוטב לבחירה: שמנת פטריות / רוזה / נפוליטנה.", "note": "", "photo": "images/לינגוויני.jpg"},
+      {"section": "pasta", "order": 1, "name": "רביולי", "price": "₪69", "desc": "במילוי גבינה או בטטה, ברוטב שמנת פטריות.", "note": "", "photo": "images/רביולי.jpg"},
+      {"section": "pasta", "order": 2, "name": "פסטה סלמון", "price": "₪85", "desc": "קוביות סלמון ברוטב שמנת לימון.", "note": "", "photo": ""},
+      {"section": "pasta", "order": 3, "name": "פסטה Seafood", "price": "₪85", "desc": "עם פירות ים ברוטב שמנת לימון.", "note": "", "photo": "images/פסטה Seafood.jpg"},
+      {"section": "kids", "order": 0, "name": "שניצלונים", "price": "₪35", "desc": "מוגש לצד צ׳יפס פריך.", "note": "", "photo": "images/שניצלונים.jpg"},
+      {"section": "kids", "order": 1, "name": "כריך נקניקיות צ׳דר", "price": "₪25", "desc": "בלחם טרי.", "note": "", "photo": ""},
+      {"section": "kids", "order": 2, "name": "בורגר קריספי", "price": "₪35", "desc": "מוגש עם צ׳יפס.", "note": "", "photo": ""},
+      {"section": "kids", "order": 3, "name": "יווני ילדים", "price": "₪15", "desc": "מרקם עדין, נגיעה מתוקה.", "note": "", "photo": ""},
+      {"section": "mezze", "order": 0, "name": "מזה בלאנקו", "price": "₪55", "desc": "", "note": "תוספת קוויאר ₪20", "photo": "images/מזה בלאנקו.jpg"},
+      {"section": "mezze", "order": 1, "name": "פוקצ׳ה שום", "price": "₪19", "desc": "אפויה במקום, בנגיעות שמן זית.", "note": "", "photo": ""},
+      {"section": "mezze", "order": 2, "name": "אדממי מלוח", "price": "₪35", "desc": "", "note": "", "photo": ""},
+      {"section": "mezze", "order": 3, "name": "קלמארי עם לבנה חריפה", "price": "₪75", "desc": "", "note": "", "photo": "images/קלמארי עם לבנה חריפה.jpg"},
+      {"section": "mezze", "order": 4, "name": "הום פרייז עוף צ׳ילי", "price": "₪55", "desc": "שילוב קראנץ׳ מעודן.", "note": "", "photo": ""}
+    ];
+
+    let dishes = [];
+    let visitsCount = 0;
+    let currentFilterCategory = 'all';
+    let currentSearchText = '';
+
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function toast(m) {
+      const t = $('#toast');
+      t.textContent = m;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    function getSecTitle(key) {
+      const s = SECTIONS.find(x => x.key === key);
+      return s ? s.title : key;
+    }
+
+    // Load category dropdown choices
+    function loadCategoriesDropdown() {
+      const select = $('#adminCategorySelect');
+      select.innerHTML = '<option value="all">כל הקטגוריות</option>';
+      SECTIONS.forEach(s => {
+        select.innerHTML += `<option value="${s.key}">${esc(s.title)}</option>`;
+      });
+    }
+    loadCategoriesDropdown();
+
+    // ---- AUTH FLOW ----
+    $('#signInBtn').addEventListener('click', async () => {
+      $('#loginErr').textContent = '';
+      const email = $('#email').value.trim();
+      const password = $('#password').value;
+      if (!email || !password) {
+        $('#loginErr').textContent = 'נא להזין אימייל וסיסמה';
+        return;
+      }
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+      } catch (e) {
+        console.error(e);
+        $('#loginErr').textContent = 'שגיאת כניסה: פרטים לא נכונים';
+      }
+    });
+
+    $('#password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') $('#signInBtn').click();
+    });
+
+    $('#logoutBtn').addEventListener('click', () => signOut(auth));
+
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        $('#loginView').classList.add('hidden');
+        $('#adminView').classList.remove('hidden');
+        loadAllData();
+      } else {
+        $('#adminView').classList.add('hidden');
+        $('#loginView').classList.remove('hidden');
+      }
+    });
+
+    // ---- LOAD DATA ----
+    async function loadAllData() {
+      try {
+        // Fetch dishes
+        const snap = await getDocs(collection(db, 'dishes'));
+        dishes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        // Fetch dynamic visits count analytics (wrapped to prevent permission errors from blocking the dashboard)
+        try {
+          const visitsSnap = await getDocs(collection(db, 'visits'));
+          visitsCount = visitsSnap.size;
+        } catch (visitsErr) {
+          console.warn('Visits collection read failed (permissions?):', visitsErr);
+          visitsCount = 'N/A';
+        }
+
+        calculateDashboardMetrics();
+        renderEditor();
+      } catch (err) {
+        console.error('Error fetching data: ', err);
+        toast('שגיאה בטעינת הנתונים מהשרת');
+      }
+    }
+
+    // Dashboard Statistics Calculation
+    function calculateDashboardMetrics() {
+      const active = dishes.filter(d => !d.archived);
+      const archived = dishes.filter(d => d.archived);
+      
+      $('#statDishes').textContent = active.length;
+      $('#statArchived').textContent = archived.length;
+      $('#statVisits').textContent = visitsCount;
+
+      // Photo coverage percentage calculation
+      if (active.length > 0) {
+        const withPhotos = active.filter(d => d.photo).length;
+        const percentage = Math.round((withPhotos / active.length) * 100);
+        $('#statPhotos').textContent = `${percentage}%`;
+      } else {
+        $('#statPhotos').textContent = '0%';
+      }
+    }
+
+    function getNextOrderSequence(secKey) {
+      const filtered = dishes.filter(d => d.section === secKey);
+      return filtered.length ? Math.max(...filtered.map(d => d.order || 0)) + 1 : 0;
+    }
+
+    // Seeding trigger
+    async function seedInitialDatabase() {
+      const seedBtn = $('#seedBtn');
+      if (seedBtn) {
+        seedBtn.disabled = true;
+        seedBtn.textContent = 'טוען מנות...';
+      }
+      try {
+        const batch = writeBatch(db);
+        SEED.forEach(d => {
+          batch.set(doc(collection(db, 'dishes')), d);
+        });
+        await batch.commit();
+        toast('התפריט נטען בהצלחה');
+        await loadAllData();
+      } catch (err) {
+        console.error(err);
+        toast('שגיאה בטעינה ראשונית');
+      }
+    }
+
+    // CRUD Actions
+    async function createNewDish(secKey) {
+      const key = secKey || SECTIONS[0].key;
+      let defaultName = 'מנה חדשה';
+      if (key === 'drinks') defaultName = 'שתייה חדשה';
+      else if (key === 'alcohol') defaultName = 'שתייה חריפה חדשה';
+
+      try {
+        await addDoc(collection(db, 'dishes'), {
+          section: key,
+          name: defaultName,
+          price: '',
+          desc: '',
+          note: '',
+          photo: '',
+          order: getNextOrderSequence(key),
+          isVegetarian: false,
+          isSpicy: false,
+          isGlutenFree: false
+        });
+        toast('מנה חדשה נוספה לתפריט');
+        await loadAllData();
+      } catch (err) {
+        console.error(err);
+        toast('שגיאה בהוספת מנה');
+      }
+    }
+
+    // Quick Add Button listener
+    $('#headerAddDishBtn').addEventListener('click', () => {
+      const currentSelectedCategory = $('#adminCategorySelect').value;
+      const targetCategory = currentSelectedCategory !== 'all' ? currentSelectedCategory : SECTIONS[0].key;
+      createNewDish(targetCategory);
+    });
+
+    async function saveEditedDish(id, cardElement) {
+      const targetSec = cardElement.querySelector('.f-section').value;
+      const d = dishes.find(x => x.id === id);
+      const categoryChanged = d && d.section !== targetSec;
+
+      const updatedFields = {
+        name: cardElement.querySelector('.f-name').value.trim(),
+        price: cardElement.querySelector('.f-price').value.trim(),
+        desc: cardElement.querySelector('.f-desc').value.trim(),
+        note: cardElement.querySelector('.f-note').value.trim(),
+        section: targetSec,
+        isVegetarian: cardElement.querySelector('.f-veg').checked,
+        isSpicy: cardElement.querySelector('.f-spicy').checked,
+        isGlutenFree: cardElement.querySelector('.f-gf').checked
+      };
+
+      try {
+        await updateDoc(doc(db, 'dishes', id), updatedFields);
+        toast('השינויים נשמרו בהצלחה');
+        
+        // Update local cache
+        if (d) {
+          Object.assign(d, updatedFields);
+        }
+        
+        calculateDashboardMetrics();
+        
+        if (categoryChanged) {
+          await loadAllData();
+        }
+      } catch (err) {
+        console.error(err);
+        toast('שגיאה בשמירת השינויים');
+      }
+    }
+
+    async function deleteDishPermanently(id) {
+      if (!confirm('האם אתה בטוח שברצונך למחוק את המנה לצמיתות? פעולה זו אינה ניתנת לביטול.')) return;
+      try {
+        await deleteDoc(doc(db, 'dishes', id));
+        toast('המנה נמחקה לצמיתות');
+        await loadAllData();
+      } catch (err) {
+        console.error(err);
+        toast('שגיאה במחיקת המנה');
+      }
+    }
+
+    async function toggleArchiveDish(id, archiveState) {
+      try {
+        await updateDoc(doc(db, 'dishes', id), { archived: archiveState });
+        toast(archiveState ? 'המנה הועברה לארכיון' : 'המנה הוחזרה לתפריט הפעיל');
+        await loadAllData();
+      } catch (err) {
+        console.error(err);
+        toast('שגיאה בשינוי מצב הארכיון');
+      }
+    }
+
+    // Photo Storage Uploader (with Drag and Drop support)
+    async function uploadDishPhoto(id, file, cardElement) {
+      const statusLbl = cardElement.querySelector('.up-status');
+      statusLbl.textContent = 'מעלה תמונה...';
+      
+      try {
+        // Clean special characters in filename
+        const safeName = Date.now() + '_' + file.name.replace(/[^\w.\-]/g, '_');
+        const storageRef = ref(storage, `dishes/${id}/${safeName}`);
+        
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+        
+        await updateDoc(doc(db, 'dishes', id), { photo: downloadUrl });
+        
+        cardElement.querySelector('.thumb').style.backgroundImage = `url("${downloadUrl}")`;
+        const d = dishes.find(x => x.id === id);
+        if (d) d.photo = downloadUrl;
+        
+        statusLbl.textContent = '✓ תמונה עודכנה';
+        calculateDashboardMetrics();
+        toast('תמונת מנה עודכנה בהצלחה');
+      } catch (err) {
+        console.error(err);
+        statusLbl.textContent = 'שגיאה בהעלאה';
+        toast('שגיאה בהעלאת קובץ');
+      }
+    }
+
+    // Resequence dishes sorting orders
+    async function moveDishOrder(id, step) {
+      const d = dishes.find(x => x.id === id);
+      if (!d) return;
+
+      const siblings = dishes
+        .filter(x => x.section === d.section && !x.archived)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+      const currentIndex = siblings.findIndex(x => x.id === id);
+      const targetIndex = currentIndex + step;
+      if (targetIndex < 0 || targetIndex >= siblings.length) return;
+
+      const dishA = siblings[currentIndex];
+      const dishB = siblings[targetIndex];
+
+      const orderA = dishA.order || 0;
+      const orderB = dishB.order || 0;
+
+      try {
+        const batch = writeBatch(db);
+        batch.update(doc(db, 'dishes', dishA.id), { order: orderB });
+        batch.update(doc(db, 'dishes', dishB.id), { order: orderA });
+        await batch.commit();
+        await loadAllData();
+      } catch (err) {
+        console.error(err);
+        toast('שגיאה בשינוי סדר המנות');
+      }
+    }
+
+    // ---- RENDER COMPONENT ELEMENT ----
+    function createDishEditCard(d) {
+      const card = document.createElement('div');
+      card.className = `ed-card ${d.archived ? 'archived' : ''}`;
+      card.dataset.id = d.id;
+
+      const thumbStyle = d.photo ? `background-image: url('${esc(d.photo)}')` : '';
+      const isArchived = !!d.archived;
+
+      const originalCategoryLabel = isArchived 
+        ? `<div style="font-size: 0.8rem; color: var(--gold); margin-bottom: 8px;">קטגוריה בארכיון: ${esc(getSecTitle(d.section))}</div>` 
+        : '';
+
+      const archiveToggleBtn = isArchived 
+        ? '<button class="btn mini save restore">החזר לתפריט</button>' 
+        : '<button class="btn ghost mini archive">העבר לארכיון</button>';
+
+      const sortingControls = isArchived 
+        ? '' 
+        : '<button class="btn ghost mini up">↑</button><button class="btn ghost mini down">↓</button>';
+
+      const deleteBtnText = isArchived ? 'מחק לצמיתות' : 'מחיקה';
+
+      let selectOptionsHtml = `<select class="f-section">`;
+      SECTIONS.forEach(s => {
+        selectOptionsHtml += `<option value="${s.key}" ${s.key === d.section ? 'selected' : ''}>${esc(s.title)}</option>`;
+      });
+      selectOptionsHtml += `</select>`;
+
+      card.innerHTML = `
+        ${originalCategoryLabel}
+        <div class="ed-row">
+          <input class="f-name" value="${esc(d.name)}" placeholder="שם המנה">
+          <input class="f-price" value="${esc(d.price)}" placeholder="מחיר (למשל: ₪75)">
+        </div>
+        <div class="ed-row" style="align-items: center;">
+          <span style="font-size: 0.85rem; color: var(--text-muted); margin-left: 8px; flex-shrink: 0;">קטגוריה:</span>
+          ${selectOptionsHtml}
+        </div>
+        <textarea class="f-desc" placeholder="תיאור המנה (רכיבים, אלרגנים, דרגת הכנה...)">${esc(d.desc)}</textarea>
+        <input class="f-note" value="${esc(d.note)}" placeholder="הערה (למשל: תוספת חזה עוף ₪12)">
+        <div class="note-hint">לכמה הערות הפרד עם הסימן | · לכמה מחירים (גדול/קטן) הפרד עם ·</div>
+        
+        <!-- Dietary flags options toggles -->
+        <div class="dietary-options-row">
+          <label class="dietary-checkbox-label">
+            <input type="checkbox" class="f-veg" ${d.isVegetarian ? 'checked' : ''}>
+            <span>🍃 צמחוני</span>
+          </label>
+          <label class="dietary-checkbox-label">
+            <input type="checkbox" class="f-spicy" ${d.isSpicy ? 'checked' : ''}>
+            <span>🌶️ פיקנטי</span>
+          </label>
+          <label class="dietary-checkbox-label">
+            <input type="checkbox" class="f-gf" ${d.isGlutenFree ? 'checked' : ''}>
+            <span>🌾 ללא גלוטן</span>
+          </label>
+        </div>
+
+        <div class="ed-photo" id="dropzone-${d.id}">
+          <div class="thumb" style="${thumbStyle}"></div>
+          <label class="btn ghost mini">
+            בחר תמונה
+            <input type="file" accept="image/*" class="f-file" hidden>
+          </label>
+          <span class="up-status">או גרור קובץ לכאן</span>
+        </div>
+
+        <div class="ed-actions">
+          <button class="btn mini save">שמור מנה</button>
+          ${archiveToggleBtn}
+          ${sortingControls}
+          <span class="spacer"></span>
+          <button class="btn danger mini del">${deleteBtnText}</button>
+        </div>
+      `;
+
+      // Event triggers binding
+      card.querySelector('.save').addEventListener('click', () => saveEditedDish(d.id, card));
+      card.querySelector('.del').addEventListener('click', () => deleteDishPermanently(d.id));
+
+      if (!isArchived) {
+        card.querySelector('.up').addEventListener('click', () => moveDishOrder(d.id, -1));
+        card.querySelector('.down').addEventListener('click', () => moveDishOrder(d.id, 1));
+        card.querySelector('.archive').addEventListener('click', () => toggleArchiveDish(d.id, true));
+      } else {
+        card.querySelector('.restore').addEventListener('click', () => toggleArchiveDish(d.id, false));
+      }
+
+      // Input uploader
+      const fileInput = card.querySelector('.f-file');
+      fileInput.addEventListener('change', e => {
+        if (e.target.files[0]) {
+          uploadDishPhoto(d.id, e.target.files[0], card);
+        }
+      });
+
+      // Drag and Drop implementation
+      const dropzone = card.querySelector(`#dropzone-${d.id}`);
+      
+      dropzone.addEventListener('dragover', e => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'var(--gold)';
+        dropzone.style.background = 'rgba(197, 168, 92, 0.05)';
+      });
+
+      dropzone.addEventListener('dragleave', () => {
+        dropzone.style.borderColor = 'var(--border-color)';
+        dropzone.style.background = 'transparent';
+      });
+
+      dropzone.addEventListener('drop', e => {
+        e.preventDefault();
+        dropzone.style.borderColor = 'var(--border-color)';
+        dropzone.style.background = 'transparent';
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+          uploadDishPhoto(d.id, files[0], card);
+        } else {
+          toast('אנא גרור קובץ תמונה בלבד');
+        }
+      });
+
+      return card;
+    }
+
+    // ---- RENDER LISTS VIEW ----
+    function renderEditor() {
+      const root = $('#editorRoot');
+      root.innerHTML = '';
+
+      if (!dishes.length) {
+        const box = document.createElement('div');
+        box.className = 'seedbox';
+        box.innerHTML = `
+          <p>בסיס הנתונים של התפריט ריק כעת. טען את 50 מנות ברירת המחדל כדי להתחיל במהירות.</p>
+          <button class="btn" id="seedBtn">טען את תפריט הבית</button>
+        `;
+        root.appendChild(box);
+        $('#seedBtn').addEventListener('click', seedInitialDatabase);
+        return;
+      }
+
+      // Apply category filter and search texts filters
+      const filtered = dishes.filter(d => {
+        const matchesCategory = currentFilterCategory === 'all' || d.section === currentFilterCategory;
+        const matchesSearch = !currentSearchText || 
+          d.name.toLowerCase().includes(currentSearchText.toLowerCase()) ||
+          (d.desc && d.desc.toLowerCase().includes(currentSearchText.toLowerCase()));
+        
+        return matchesCategory && matchesSearch;
+      });
+
+      // Split into active and archived lists
+      const activeList = filtered.filter(d => !d.archived);
+      const archivedList = filtered.filter(d => d.archived);
+
+      // Render active sections per category
+      SECTIONS.forEach(sec => {
+        // Skip categories that don't match Category Filter dropdown if filter is active
+        if (currentFilterCategory !== 'all' && currentFilterCategory !== sec.key) return;
+
+        const secDishes = activeList.filter(d => d.section === sec.key).sort((a,b) => (a.order || 0) - (b.order || 0));
+        
+        // Hide category headers in render list if search queries returned empty rows
+        if (currentSearchText && !secDishes.length) return;
+
+        const sectionBlock = document.createElement('div');
+        sectionBlock.className = 'ed-section';
+
+        const head = document.createElement('div');
+        head.className = 'ed-sec-head';
+        
+        let addBtnText = '+ מנה';
+        if (sec.key === 'drinks') addBtnText = '+ שתייה';
+        else if (sec.key === 'alcohol') addBtnText = '+ שתייה חריפה';
+
+        head.innerHTML = `
+          <h3>${esc(sec.title)}</h3>
+          <button class="btn ghost mini add">${addBtnText}</button>
+        `;
+        
+        head.querySelector('.add').addEventListener('click', () => createNewDish(sec.key));
+        sectionBlock.appendChild(head);
+
+        if (secDishes.length === 0) {
+          const emptyInfo = document.createElement('p');
+          emptyInfo.style.color = 'var(--text-muted)';
+          emptyInfo.style.fontSize = '0.82rem';
+          emptyInfo.style.padding = '8px 4px';
+          emptyInfo.textContent = 'אין מנות בקטגוריה זו.';
+          sectionBlock.appendChild(emptyInfo);
+        } else {
+          secDishes.forEach(d => sectionBlock.appendChild(createDishEditCard(d)));
+        }
+
+        root.appendChild(sectionBlock);
+      });
+
+      // Render archived block
+      if (archivedList.length > 0) {
+        const archivedBlock = document.createElement('div');
+        archivedBlock.className = 'ed-section';
+        archivedBlock.style.marginTop = '48px';
+        archivedBlock.style.paddingTop = '24px';
+        archivedBlock.style.borderTop = '2px dashed var(--gold)';
+
+        const head = document.createElement('div');
+        head.className = 'ed-sec-head';
+        head.innerHTML = `<h3 style="color: var(--danger)">ארכיון מנות (לא מוצגות בתפריט)</h3>`;
+        archivedBlock.appendChild(head);
+
+        archivedList.sort((a, b) => {
+          const secA = SECTIONS.findIndex(s => s.key === a.section);
+          const secB = SECTIONS.findIndex(s => s.key === b.section);
+          if (secA !== secB) return secA - secB;
+          return (a.order || 0) - (b.order || 0);
+        });
+
+        archivedList.forEach(d => archivedBlock.appendChild(createDishEditCard(d)));
+        root.appendChild(archivedBlock);
+      }
+    }
+
+    // Input handlers
+    $('#adminSearchInput').addEventListener('input', e => {
+      currentSearchText = e.target.value.trim();
+      renderEditor();
+    });
+
+    $('#adminCategorySelect').addEventListener('change', e => {
+      currentFilterCategory = e.target.value;
+      renderEditor();
+    });
+  </script>
+</body>
+</html>

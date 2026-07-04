@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BLANCO — תפריט דיגיטלי</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body class="light-theme">
+
+  <!-- Top Action Header -->
+  <header class="site-header">
+    <div class="theme-toggle-wrap">
+      <button class="theme-toggle-btn" id="themeToggle" aria-label="שינוי מצב תצוגה">
+        <!-- Moon Icon (Hidden by Default in Light Mode) -->
+        <svg id="themeIconMoon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <!-- Sun Icon (Visible by Default in Light Mode) -->
+        <svg id="themeIconSun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.72" x2="5.64" y2="18.30"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </div>
+    
+    <img src="images/logo.png" alt="BLANCO Logo" class="logo-img">
+    <div class="header-divider"></div>
+  </header>
+
+
+
+  <!-- Sticky Scrolling Section Pills Navigator -->
+  <nav class="sticky-nav" id="stickyNav">
+    <div class="nav-pills-wrapper">
+      <div class="nav-pills no-scrollbar" id="navPills"></div>
+    </div>
+  </nav>
+
+  <!-- Menu Root Container -->
+  <main id="menuMain">
+    <div id="menuRoot">
+      <!-- Loading Skeletons -->
+      <div class="items-grid" style="margin-top: 20px;">
+        <div class="skeleton-card"><div class="skeleton-shimmer"></div></div>
+        <div class="skeleton-card"><div class="skeleton-shimmer"></div></div>
+        <div class="skeleton-card"><div class="skeleton-shimmer"></div></div>
+        <div class="skeleton-card"><div class="skeleton-shimmer"></div></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Float Order Selections Badge -->
+  <button class="floating-order-badge" id="floatingOrderBtn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <path d="M16 10a4 4 0 0 1-8 0"></path>
+    </svg>
+    <span>הבחירות שלי</span>
+    <span class="order-count-bubble" id="orderCountBubble">0</span>
+  </button>
+
+  <!-- Selections Bottom Sheet Drawer -->
+  <div class="drawer-overlay" id="drawerOverlay"></div>
+  <div class="order-drawer" id="orderDrawer">
+    <div class="drawer-handle"></div>
+    <div class="drawer-header">
+      <h3 class="drawer-title">הבחירות שלי</h3>
+      <button class="drawer-close-btn" id="drawerCloseBtn" aria-label="סגור">✕</button>
+    </div>
+    <div class="drawer-content" id="drawerContent">
+      <!-- Injected row selections -->
+    </div>
+    <div class="drawer-footer">
+      <div class="price-tally-row">
+        <span>סה״כ מוערך:</span>
+        <span class="price-tally-value" id="priceTallyValue">₪0</span>
+      </div>
+      <button class="clear-selections-btn" id="clearSelectionsBtn">נקה את כל הבחירות</button>
+    </div>
+  </div>
+
+  <!-- Interactive Full Screen Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="תצוגת תמונה מוגדלת">
+    <button class="lightbox-close" id="lightboxClose" aria-label="סגור">✕</button>
+    <div class="lightbox-content-wrap" id="lightboxContent">
+      <img class="lightbox-img" id="lightboxImg" src="" alt="">
+      <div class="lightbox-info">
+        <h4 class="lightbox-title" id="lightboxTitle"></h4>
+        <p class="lightbox-desc" id="lightboxDesc"></p>
+      </div>
+      <span class="swipe-hint">החליקו למטה כדי לסגור</span>
+    </div>
+  </div>
+
+  <!-- Footer Actions -->
+  <footer>
+    <div class="footer-logo">BLANCO</div>
+    <p class="footer-note">המחירים כוללים מע״מ · אנא עדכנו את צוות המלצרים על אלרגיות כלשהן</p>
+    <a href="qr.html" class="qr-footer-link">קוד לסריקה שולחנית (QR)</a>
+  </footer>
+
+  <!-- Scroll Back to Top Button -->
+  <button class="scroll-top" id="scrollTopBtn" aria-label="חזרה למעלה">↑</button>
+
+  <div class="toast-msg" id="toastMsg"></div>
+
+  <!-- App Logic Integrations -->
+  <script type="module">
+    import { firebaseConfig, SECTIONS } from './menu-config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Selections state (Local Storage mapping)
+    let selectedDishes = JSON.parse(localStorage.getItem('blanco_selections') || '{}');
+    let allDishes = [];
+
+    // Elements
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    
+    // Toast Notification helper
+    function showToast(msg) {
+      const toast = $('#toastMsg');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    // Escape HTML helper
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Parse and detect dietary flags from texts if not set explicitly
+    function checkDietary(dish, type) {
+      if (type === 'vegetarian') {
+        if (dish.isVegetarian !== undefined) return !!dish.isVegetarian;
+        const keywords = ['צמחוני', 'טבעוני', 'חלומי', 'גבינ', 'פטה', 'סלט', 'שקשוקה', 'קרואסון חמאה'];
+        return keywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
+      }
+      if (type === 'spicy') {
+        if (dish.isSpicy !== undefined) return !!dish.isSpicy;
+        const keywords = ['חריף', 'פיקנטי', 'צ׳ילי', 'סומאק', 'לבנה חריפה'];
+        return keywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
+      }
+      if (type === 'glutenfree') {
+        if (dish.isGlutenFree !== undefined) return !!dish.isGlutenFree;
+        const keywords = ['ללא גלוטן', 'סלמון', 'פילה אנגוס', 'קרפצ׳יו', 'פירות ים'];
+        // Pastas, bread, foccacias, schnitzels are generally not gluten free
+        const glutenKeywords = ['פסטה', 'לחם', 'ג׳בטה', 'קרואסון', 'שניצל', 'טוסט', 'קרוטונים', 'פוקצ׳ה'];
+        const matchesGluten = glutenKeywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
+        return !matchesGluten && keywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
+      }
+      return false;
+    }
+
+    // Generate Single Card HTML
+    function buildCardHTML(d) {
+      const isSelected = !!selectedDishes[d.id];
+      const quantity = isSelected ? selectedDishes[d.id].qty : 0;
+      
+      const variants = (d.price && d.price.includes(' \u00b7 ')) ? d.price.split(' \u00b7 ') : null;
+      const priceTop = (d.price && !variants) ? `<span class="item-price">${esc(d.price)}</span>` : '';
+      const variantRow = variants ? `<div class="price-row">${variants.map(v => `<span class="price-variant">${esc(v)}</span>`).join('')}</div>` : '';
+      const desc = d.desc ? `<p class="item-desc">${esc(d.desc)}</p>` : '';
+      const notes = d.note ? d.note.split(' | ').map(n => `<span class="item-note">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 3px;">
+          <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        ${esc(n)}
+      </span>`).join('') : '';
+
+      // Dietary tags preview badges
+      let tagBadges = '';
+      if (checkDietary(d, 'vegetarian')) {
+        tagBadges += `<span class="diet-badge" title="צמחוני">🍃</span>`;
+      }
+      if (checkDietary(d, 'spicy')) {
+        tagBadges += `<span class="diet-badge" title="פיקנטי / חריף">🌶️</span>`;
+      }
+      if (checkDietary(d, 'glutenfree')) {
+        tagBadges += `<span class="diet-badge" title="ללא גלוטן">🌾</span>`;
+      }
+
+      const orderBtn = `<button class="add-to-order-btn ${isSelected ? 'added' : ''}" data-id="${d.id}">
+        ${isSelected ? '✓ נבחרה (' + quantity + ')' : '+ הוסף לבחירות'}
+      </button>`;
+
+      const img = `<img class="card-img" ${d.photo ? `src="${esc(d.photo)}"` : ''} alt="${esc(d.name)}" loading="lazy" data-desc="${esc(d.desc || '')}">`;
+
+      return `
+        <div class="menu-card" data-id="${d.id}" data-name="${esc(d.name)}">
+          <div class="card-body">
+            <div class="card-top">
+              <span class="item-name">${esc(d.name)}</span>
+              ${priceTop}
+            </div>
+            ${desc}
+            ${variantRow}
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:auto;">
+              ${orderBtn}
+              <div class="card-dietary-tags">${tagBadges}</div>
+            </div>
+            <div style="margin-top:6px; display:flex; flex-direction:column; gap:4px;">${notes}</div>
+          </div>
+          <div class="card-img-wrap">${img}</div>
+        </div>
+      `;
+    }
+
+    // Render Full Menu Grid
+    function renderMenu() {
+      const mainRoot = $('#menuMain');
+      
+      if (!allDishes.length) {
+        mainRoot.innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+            <p>אין מנות זמינות להצגה כרגע.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Group dishes by Section key
+      const grouped = {};
+      allDishes.forEach(d => {
+        (grouped[d.section] = grouped[d.section] || []).push(d);
+      });
+
+      // Sort subgroups by order field
+      Object.values(grouped).forEach(arr => {
+        arr.sort((a, b) => (a.order || 0) - (b.order || 0));
+      });
+
+      let html = '';
+      let pillsHtml = '';
+      let isFirst = true;
+
+      SECTIONS.forEach(sec => {
+        const arr = grouped[sec.key];
+        if (!arr || !arr.length) return;
+
+        const shortTitle = sec.short || sec.title;
+        pillsHtml += `<button class="nav-pill ${isFirst ? 'active' : ''}" data-target="${sec.key}">${esc(shortTitle)}</button>`;
+        isFirst = false;
+
+        html += `
+          <section class="menu-section" id="${sec.key}">
+            <div class="section-header">
+              <h2 class="section-title">${esc(sec.title)}</h2>
+              <hr class="section-divider">
+            </div>
+            <div class="items-grid">
+              ${arr.map(buildCardHTML).join('')}
+            </div>
+          </section>
+        `;
+      });
+
+      // Inject HTML (including indicator as child to avoid page overflow stretching)
+      $('#navPills').innerHTML = pillsHtml + '<div class="nav-slider-indicator" id="navIndicator"></div>';
+      mainRoot.innerHTML = html;
+
+      initInteractions();
+      updateSlidingIndicator();
+      updateOrderUI();
+    }
+
+    // Dynamic Sliding pill indicator handler
+    function updateSlidingIndicator() {
+      const activePill = $('.nav-pill.active');
+      const indicator = $('#navIndicator');
+      if (activePill && indicator) {
+        indicator.style.width = `${activePill.offsetWidth}px`;
+        indicator.style.left = `${activePill.offsetLeft}px`;
+      } else if (indicator) {
+        indicator.style.width = '0';
+      }
+    }
+
+    // Selections Logic Handlers
+    function updateOrderUI() {
+      const count = Object.values(selectedDishes).reduce((acc, curr) => acc + curr.qty, 0);
+      const floatBtn = $('#floatingOrderBtn');
+      const bubble = $('#orderCountBubble');
+      
+      // Toggle floating button visibility
+      if (count > 0) {
+        floatBtn.classList.add('visible');
+        bubble.textContent = count;
+      } else {
+        floatBtn.classList.remove('visible');
+        toggleDrawer(false);
+      }
+
+      // Calculate total price
+      let tally = 0;
+      let drawerHtml = '';
+
+      Object.entries(selectedDishes).forEach(([id, dish]) => {
+        // Parse numerical price (handles variants and symbols like ₪)
+        let priceNum = 0;
+        const cleanedPrice = dish.price.replace(/[^\d.]/g, '');
+        if (cleanedPrice) {
+          priceNum = parseFloat(cleanedPrice);
+        }
+        const itemTally = priceNum * dish.qty;
+        tally += itemTally;
+
+        drawerHtml += `
+          <div class="selected-item-row" data-id="${id}">
+            <div class="sel-item-info">
+              <span class="sel-item-name">${esc(dish.name)}</span>
+              <span class="sel-item-price">${esc(dish.price)}</span>
+            </div>
+            <div class="sel-item-controls">
+              <button class="qty-btn dec-qty" data-id="${id}">-</button>
+              <span class="qty-number">${dish.qty}</span>
+              <button class="qty-btn inc-qty" data-id="${id}">+</button>
+            </div>
+          </div>
+        `;
+      });
+
+      $('#priceTallyValue').textContent = `₪${tally}`;
+      $('#drawerContent').innerHTML = drawerHtml || `
+        <div class="drawer-empty-state">
+          <p>לא נבחרו מנות עדיין.</p>
+        </div>
+      `;
+
+      // Save state to Local Storage
+      localStorage.setItem('blanco_selections', JSON.stringify(selectedDishes));
+    }
+
+    function addSelection(id) {
+      const dish = allDishes.find(x => x.id === id);
+      if (!dish) return;
+
+      if (selectedDishes[id]) {
+        selectedDishes[id].qty += 1;
+      } else {
+        selectedDishes[id] = {
+          name: dish.name,
+          price: dish.price,
+          qty: 1
+        };
+      }
+      
+      showToast(`המנה "${dish.name}" נוספה לבחירות`);
+      updateOrderUI();
+      
+      // Update card button UI text instantly
+      const btn = $(`.add-to-order-btn[data-id="${id}"]`);
+      if (btn) {
+        btn.classList.add('added');
+        btn.textContent = `✓ נבחרה (${selectedDishes[id].qty})`;
+      }
+    }
+
+    function removeSelection(id, fully = false) {
+      if (!selectedDishes[id]) return;
+
+      if (fully || selectedDishes[id].qty <= 1) {
+        delete selectedDishes[id];
+        const btn = $(`.add-to-order-btn[data-id="${id}"]`);
+        if (btn) {
+          btn.classList.remove('added');
+          btn.textContent = '+ הוסף לבחירות';
+        }
+      } else {
+        selectedDishes[id].qty -= 1;
+        const btn = $(`.add-to-order-btn[data-id="${id}"]`);
+        if (btn) {
+          btn.textContent = `✓ נבחרה (${selectedDishes[id].qty})`;
+        }
+      }
+      updateOrderUI();
+    }
+
+    // Scroll & Intersection Interactions
+    function initInteractions() {
+      const nav = $('#stickyNav');
+      const pills = $$('.nav-pill');
+      const sections = $$('.menu-section');
+      const scrollBtn = $('#scrollTopBtn');
+      const pillsEl = $('#navPills');
+
+      // Click pill to scroll smoothly
+      pills.forEach(p => p.addEventListener('click', () => {
+        const t = document.getElementById(p.dataset.target);
+        if (!t) return;
+        
+        // Remove temporarily intersection highlighting during forced click scrolls
+        obs.disconnect();
+        
+        pills.forEach(x => x.classList.remove('active'));
+        p.classList.add('active');
+        updateSlidingIndicator();
+        p.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        
+        const top = t.getBoundingClientRect().top + window.pageYOffset - nav.offsetHeight - 12;
+        
+        window.scrollTo({ top, behavior: 'smooth' });
+        
+        // Re-enable observer after smooth scroll completes
+        setTimeout(() => {
+          sections.forEach(s => obs.observe(s));
+        }, 800);
+      }));
+
+      // High-performance IntersectionObserver to highlight active category on scrolling
+      const obs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (!e.isIntersecting) return;
+          const id = e.target.id;
+          
+          pills.forEach(p => {
+            const isTarget = p.dataset.target === id;
+            p.classList.toggle('active', isTarget);
+          });
+          
+          updateSlidingIndicator();
+          
+          const activePill = pillsEl.querySelector('.nav-pill[data-target="' + id + '"]');
+          if (activePill) {
+            activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        });
+      }, {
+        rootMargin: '-' + (nav.offsetHeight + 10) + 'px 0px -60% 0px',
+        threshold: 0
+      });
+      
+      sections.forEach(s => obs.observe(s));
+
+      // Scroll event throttling
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => {
+          const isScrolled = window.pageYOffset > 40;
+          nav.classList.toggle('scrolled', isScrolled);
+          scrollBtn.classList.toggle('visible', window.pageYOffset > 320);
+          ticking = false;
+        });
+      }, { passive: true });
+
+      scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
+
+    // Lightbox Details & Swipe Dismissals
+    const lightbox = $('#lightbox');
+    const lightboxImg = $('#lightboxImg');
+    const lightboxClose = $('#lightboxClose');
+    const lightboxTitle = $('#lightboxTitle');
+    const lightboxDesc = $('#lightboxDesc');
+    const lightboxContent = $('#lightboxContent');
+
+    let touchStartY = 0;
+    let touchEndY = 0;
+
+    function openLightbox(src, alt, desc) {
+      lightboxImg.src = src;
+      lightboxImg.alt = alt;
+      lightboxTitle.textContent = alt;
+      lightboxDesc.textContent = desc || '';
+      lightbox.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      lightboxContent.style.transform = 'translateY(0)';
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        lightboxImg.src = '';
+        lightboxTitle.textContent = '';
+        lightboxDesc.textContent = '';
+      }, 300);
+    }
+
+    // Clicks on images inside cards triggers lightbox
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('card-img') && e.target.src) {
+        openLightbox(e.target.src, e.target.alt, e.target.dataset.desc);
+      }
+      
+      // Add selection click delegate
+      if (e.target.classList.contains('add-to-order-btn')) {
+        const id = e.target.dataset.id;
+        addSelection(id);
+      }
+
+      // Quantity buttons click delegates inside Selections Drawer
+      if (e.target.classList.contains('inc-qty')) {
+        const id = e.target.dataset.id;
+        addSelection(id);
+      }
+      if (e.target.classList.contains('dec-qty')) {
+        const id = e.target.dataset.id;
+        removeSelection(id);
+      }
+    });
+
+    lightbox.addEventListener('click', e => {
+      if (e.target === lightbox || e.target === lightboxClose || e.target.id === 'lightboxContent') {
+        closeLightbox();
+      }
+    });
+    
+    lightboxClose.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    // Touch events for drag-to-dismiss gesture on lightbox
+    lightboxContent.addEventListener('touchstart', e => {
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    lightboxContent.addEventListener('touchmove', e => {
+      const currentY = e.changedTouches[0].screenY;
+      const diff = currentY - touchStartY;
+      if (diff > 0) { // Dragging downwards
+        lightboxContent.style.transform = `translateY(${diff}px)`;
+      }
+    }, { passive: true });
+
+    lightboxContent.addEventListener('touchend', e => {
+      touchEndY = e.changedTouches[0].screenY;
+      const diff = touchEndY - touchStartY;
+      if (diff > 120) { // Dragged down enough to dismiss
+        closeLightbox();
+      } else { // Bounce back
+        lightboxContent.style.transform = 'translateY(0)';
+      }
+    }, { passive: true });
+
+    // Selections Bottom Sheet Drawer triggers
+    const orderDrawer = $('#orderDrawer');
+    const drawerOverlay = $('#drawerOverlay');
+    const floatingBtn = $('#floatingOrderBtn');
+    const drawerCloseBtn = $('#drawerCloseBtn');
+
+    function toggleDrawer(open) {
+      if (open) {
+        drawerOverlay.classList.add('open');
+        orderDrawer.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      } else {
+        drawerOverlay.classList.remove('open');
+        orderDrawer.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+
+    floatingBtn.addEventListener('click', () => toggleDrawer(true));
+    drawerOverlay.addEventListener('click', () => toggleDrawer(false));
+    drawerCloseBtn.addEventListener('click', () => toggleDrawer(false));
+    
+    // Swipe down to close drawer on mobile handle bar
+    $('.drawer-handle').addEventListener('touchstart', e => {
+      touchStartY = e.changedTouches[0].screenY;
+    }, { passive: true });
+
+    $('.drawer-handle').addEventListener('touchmove', e => {
+      const currentY = e.changedTouches[0].screenY;
+      const diff = currentY - touchStartY;
+      if (diff > 0) {
+        orderDrawer.style.transform = `translateY(${diff}px)`;
+      }
+    }, { passive: true });
+
+    $('.drawer-handle').addEventListener('touchend', e => {
+      touchEndY = e.changedTouches[0].screenY;
+      const diff = touchEndY - touchStartY;
+      if (diff > 120) {
+        toggleDrawer(false);
+      }
+      orderDrawer.style.transform = '';
+    }, { passive: true });
+
+    $('#clearSelectionsBtn').addEventListener('click', () => {
+      if (confirm('האם ברצונך לנקות את כל המנות שנבחרו?')) {
+        selectedDishes = {};
+        updateOrderUI();
+        // Rerender to restore cards add buttons
+        renderMenu();
+        showToast('כל הבחירות נוקו');
+      }
+    });
+
+    // Theme Switcher Dial
+    const themeBtn = $('#themeToggle');
+    const htmlEl = document.body;
+    
+    themeBtn.addEventListener('click', () => {
+      const isLight = htmlEl.classList.toggle('light-theme');
+      localStorage.setItem('blanco_theme', isLight ? 'light' : 'dark');
+      
+      // Swap dial icons
+      if (isLight) {
+        $('#themeIconMoon').style.display = 'none';
+        $('#themeIconSun').style.display = 'block';
+      } else {
+        $('#themeIconMoon').style.display = 'block';
+        $('#themeIconSun').style.display = 'none';
+      }
+      
+      // Briefly show feedback
+      showToast(isLight ? 'הופעל עיצוב בהיר' : 'הופעל עיצוב כהה');
+    });
+
+
+
+
+
+    // Window size change updates active pill position indicator
+    window.addEventListener('resize', updateSlidingIndicator);
+
+    // Initial Database loading
+    async function loadDishesData() {
+      try {
+        // Track visit — writes timestamp asynchronously to visits collection
+        addDoc(collection(db, 'visits'), { openedAt: serverTimestamp() }).catch(err => console.log('Visits collection tracking ignored: ', err));
+
+        const snap = await getDocs(collection(db, 'dishes'));
+        allDishes = snap.docs.map(x => ({ id: x.id, ...x.data() }));
+        const activeDishes = allDishes.filter(x => !x.archived);
+        
+        // Replace skeleton screens with rendered menu
+        allDishes = activeDishes;
+        renderMenu();
+      } catch (err) {
+        console.error(err);
+        $('#menuRoot').className = 'menu-state';
+        $('#menuRoot').innerHTML = `
+          <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+            <p>שגיאה בטעינת המנות. אנא בדוק את החיבור לרשת ונסה שוב.</p>
+          </div>
+        `;
+      }
+    }
+    
+    // Kick off load
+    loadDishesData();
+  </script>
+</body>
+</html>
