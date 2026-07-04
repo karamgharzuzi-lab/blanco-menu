@@ -284,8 +284,8 @@
     }
 
     // Dynamic Sliding pill indicator handler
-    function updateSlidingIndicator() {
-      const activePill = $('.nav-pill.active');
+    function updateSlidingIndicator(activePill) {
+      if (!activePill) activePill = $('.nav-pill.active');
       const indicator = $('#navIndicator');
       if (activePill && indicator) {
         indicator.style.width = `${activePill.offsetWidth}px`;
@@ -427,23 +427,33 @@
       }));
 
       // High-performance IntersectionObserver to highlight active category on scrolling
+      let currentActiveId = '';
       const obs = new IntersectionObserver(entries => {
+        let activeId = '';
         entries.forEach(e => {
-          if (!e.isIntersecting) return;
-          const id = e.target.id;
-          
-          pills.forEach(p => {
-            const isTarget = p.dataset.target === id;
-            p.classList.toggle('active', isTarget);
-          });
-          
-          updateSlidingIndicator();
-          
-          const activePill = pillsEl.querySelector('.nav-pill[data-target="' + id + '"]');
-          if (activePill) {
-            activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          if (e.isIntersecting) {
+            activeId = e.target.id;
           }
         });
+
+        if (activeId && activeId !== currentActiveId) {
+          currentActiveId = activeId;
+          
+          requestAnimationFrame(() => {
+            pills.forEach(p => {
+              const isTarget = p.dataset.target === activeId;
+              p.classList.toggle('active', isTarget);
+            });
+            
+            const activePill = pillsEl.querySelector('.nav-pill[data-target="' + activeId + '"]');
+            
+            updateSlidingIndicator(activePill);
+            
+            if (activePill) {
+              activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+          });
+        }
       }, {
         rootMargin: '-' + (nav.offsetHeight + 10) + 'px 0px -60% 0px',
         threshold: 0
