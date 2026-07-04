@@ -515,6 +515,70 @@ main {
   color: var(--gold-accent);
 }
 
+/* Spicy Badge with animated flame effect */
+.diet-badge.spicy-badge {
+  position: relative;
+  overflow: visible;
+  border-color: rgba(255, 69, 0, 0.35);
+  background: rgba(255, 69, 0, 0.08);
+}
+
+.diet-badge.spicy-badge:hover {
+  background: rgba(255, 69, 0, 0.15);
+  border-color: rgba(255, 69, 0, 0.6);
+  box-shadow: 0 0 8px rgba(255, 69, 0, 0.4);
+}
+
+.spicy-badge .flame-wrapper {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+  z-index: 1;
+  animation: flameFloat 2.5s infinite ease-in-out;
+}
+
+.spicy-badge .flame-svg {
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+  animation: flameFlicker 0.5s infinite alternate ease-in-out;
+  filter: drop-shadow(0 0 2px rgba(255, 69, 0, 0.5));
+}
+
+.spicy-badge .pepper-icon {
+  position: relative;
+  z-index: 2;
+  font-size: 11px;
+}
+
+@keyframes flameFlicker {
+  0% {
+    transform: scale(0.9) rotate(-2deg);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.05) rotate(2deg) skewX(-2deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95) rotate(-1deg);
+    opacity: 0.9;
+  }
+}
+
+@keyframes flameFloat {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-2px);
+  }
+}
+
+
 /* Card Image Area (Mobile First - Left Side) */
 .card-img-wrap {
   flex-shrink: 0;
