@@ -518,63 +518,96 @@ main {
 /* Spicy Badge with animated flame effect */
 .diet-badge.spicy-badge {
   position: relative;
-  overflow: visible;
-  border-color: rgba(255, 69, 0, 0.35);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border-color: rgba(255, 69, 0, 0.4);
   background: rgba(255, 69, 0, 0.08);
+  overflow: visible;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .diet-badge.spicy-badge:hover {
-  background: rgba(255, 69, 0, 0.15);
+  background: rgba(255, 69, 0, 0.16);
   border-color: rgba(255, 69, 0, 0.6);
   box-shadow: 0 0 8px rgba(255, 69, 0, 0.4);
 }
 
-.spicy-badge .flame-wrapper {
+.spicy-svg-badge {
+  width: 140%;
+  height: 140%;
   position: absolute;
-  top: -12px;
-  left: 50%;
-  width: 22px;
-  height: 22px;
+  top: -25%;
+  left: -20%;
   pointer-events: none;
-  z-index: 1;
-  animation: flameFloat 2.5s infinite ease-in-out;
+  overflow: visible;
 }
 
-.spicy-badge .flame-svg {
-  width: 100%;
-  height: 100%;
-  transform-origin: bottom center;
-  animation: flameFlicker 0.5s infinite alternate ease-in-out;
-  filter: drop-shadow(0 0 2px rgba(255, 69, 0, 0.5));
+/* Individual Flame Layer Animations */
+.spicy-svg-badge .flame-back {
+  transform-origin: 12px 15px;
+  animation: flickerBack 0.4s infinite ease-in-out alternate;
 }
 
-.spicy-badge .pepper-icon {
-  position: relative;
-  z-index: 2;
-  font-size: 11px;
+.spicy-svg-badge .flame-left {
+  transform-origin: 8px 15px;
+  animation: flickerLeft 0.5s infinite ease-in-out alternate;
+  animation-delay: 0.1s;
 }
 
-@keyframes flameFlicker {
+.spicy-svg-badge .flame-right {
+  transform-origin: 16px 15px;
+  animation: flickerRight 0.45s infinite ease-in-out alternate;
+  animation-delay: 0.05s;
+}
+
+/* Chili Pepper Body Glow */
+.spicy-svg-badge .pepper-body {
+  transform-origin: 12px 15px;
+  animation: pepperGlow 1.5s infinite ease-in-out alternate;
+}
+
+@keyframes flickerBack {
   0% {
-    transform: scale(0.9) rotate(-2deg);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.05) rotate(2deg) skewX(-2deg);
-    opacity: 1;
+    transform: scale(0.9) rotate(-1deg);
+    filter: drop-shadow(0 0 1px #ff5a00);
   }
   100% {
-    transform: scale(0.95) rotate(-1deg);
-    opacity: 0.9;
+    transform: scale(1.1) rotate(1deg);
+    filter: drop-shadow(0 0 4px #ff5a00);
   }
 }
 
-@keyframes flameFloat {
-  0%, 100% {
-    transform: translateX(-50%) translateY(0);
+@keyframes flickerLeft {
+  0% {
+    transform: scaleY(0.85) scaleX(0.9) skewX(-2deg);
+    filter: drop-shadow(0 0 1px #ff7b00);
   }
-  50% {
-    transform: translateX(-50%) translateY(-2px);
+  100% {
+    transform: scaleY(1.05) scaleX(1.1) skewX(2deg);
+    filter: drop-shadow(0 0 3px #ff7b00);
+  }
+}
+
+@keyframes flickerRight {
+  0% {
+    transform: scaleY(0.9) scaleX(0.85) skewX(2deg);
+    filter: drop-shadow(0 0 1px #ffae00);
+  }
+  100% {
+    transform: scaleY(1.1) scaleX(1.05) skewX(-2deg);
+    filter: drop-shadow(0 0 3px #ffae00);
+  }
+}
+
+@keyframes pepperGlow {
+  0% {
+    filter: drop-shadow(0 0 0.5px rgba(229, 57, 53, 0.4));
+  }
+  100% {
+    filter: drop-shadow(0 0 2.5px rgba(229, 57, 53, 0.8));
   }
 }
 
