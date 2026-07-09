@@ -803,11 +803,6 @@ main {
   font-weight: 500;
 }
 
-.sel-item-price {
-  font-size: 0.82rem;
-  color: var(--gold);
-}
-
 .sel-item-controls {
   display: flex;
   align-items: center;
@@ -858,17 +853,6 @@ main {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.price-tally-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.price-tally-value {
-  color: var(--gold);
 }
 
 .clear-selections-btn {

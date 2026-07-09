@@ -82,10 +82,6 @@
       <!-- Injected row selections -->
     </div>
     <div class="drawer-footer">
-      <div class="price-tally-row">
-        <span>סה״כ מוערך:</span>
-        <span class="price-tally-value" id="priceTallyValue">₪0</span>
-      </div>
       <button class="clear-selections-btn" id="clearSelectionsBtn">נקה את כל הבחירות</button>
     </div>
   </div>
@@ -312,25 +308,13 @@
         toggleDrawer(false);
       }
 
-      // Calculate total price
-      let tally = 0;
       let drawerHtml = '';
 
       Object.entries(selectedDishes).forEach(([id, dish]) => {
-        // Parse numerical price (handles variants and symbols like ₪)
-        let priceNum = 0;
-        const cleanedPrice = dish.price.replace(/[^\d.]/g, '');
-        if (cleanedPrice) {
-          priceNum = parseFloat(cleanedPrice);
-        }
-        const itemTally = priceNum * dish.qty;
-        tally += itemTally;
-
         drawerHtml += `
           <div class="selected-item-row" data-id="${id}">
             <div class="sel-item-info">
               <span class="sel-item-name">${esc(dish.name)}</span>
-              <span class="sel-item-price">${esc(dish.price)}</span>
             </div>
             <div class="sel-item-controls">
               <button class="qty-btn dec-qty" data-id="${id}">-</button>
@@ -341,7 +325,6 @@
         `;
       });
 
-      $('#priceTallyValue').textContent = `₪${tally}`;
       $('#drawerContent').innerHTML = drawerHtml || `
         <div class="drawer-empty-state">
           <p>לא נבחרו מנות עדיין.</p>
