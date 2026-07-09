@@ -94,6 +94,11 @@
       <div class="lightbox-info">
         <h4 class="lightbox-title" id="lightboxTitle"></h4>
         <p class="lightbox-desc" id="lightboxDesc"></p>
+        <p class="lightbox-note" id="lightboxNote"></p>
+        <div class="lightbox-actions">
+          <span class="lightbox-price" id="lightboxPrice"></span>
+          <button class="lightbox-add-btn" id="lightboxAddBtn" type="button">הוסף לבחירות</button>
+        </div>
       </div>
       <span class="swipe-hint">החליקו למטה כדי לסגור</span>
     </div>
@@ -173,6 +178,7 @@
     function buildCardHTML(d) {
       const isSelected = !!selectedDishes[d.id];
       const quantity = isSelected ? selectedDishes[d.id].qty : 0;
+      const isSignature = Number(d.order || 0) === 0;
       
       const variants = (d.price && d.price.includes(' \u00b7 ')) ? d.price.split(' \u00b7 ') : null;
       const priceTop = (d.price && !variants) ? `<span class="item-price">${esc(d.price)}</span>` : '';
@@ -201,24 +207,32 @@
         ${isSelected ? '✓ נבחרה (' + quantity + ')' : '+ הוסף לבחירות'}
       </button>`;
 
-      const img = `<img class="card-img" ${d.photo ? `src="${esc(d.photo)}"` : ''} alt="${esc(d.name)}" loading="lazy" data-desc="${esc(d.desc || '')}">`;
+      const img = `<img class="card-img" ${d.photo ? `src="${esc(d.photo)}"` : ''} alt="${esc(d.name)}" loading="lazy">`;
+      const signatureBadge = isSignature ? '<span class="signature-badge">בחירת הבית</span>' : '';
 
       return `
-        <div class="menu-card" data-id="${d.id}" data-name="${esc(d.name)}">
+        <div class="menu-card ${isSelected ? 'is-selected' : ''}" data-id="${d.id}" data-name="${esc(d.name)}">
           <div class="card-body">
             <div class="card-top">
-              <span class="item-name">${esc(d.name)}</span>
-              ${priceTop}
+              <div class="item-heading">
+                ${signatureBadge}
+                <span class="item-name">${esc(d.name)}</span>
+              </div>
+              <div class="item-price-wrap">${priceTop}</div>
             </div>
             ${desc}
             ${variantRow}
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-top:auto;">
+            <div class="card-actions">
               ${orderBtn}
+              <button class="dish-details-btn" data-id="${d.id}" type="button">פרטים</button>
               <div class="card-dietary-tags">${tagBadges}</div>
             </div>
-            <div style="margin-top:6px; display:flex; flex-direction:column; gap:4px;">${notes}</div>
+            <div class="item-notes">${notes}</div>
           </div>
-          <div class="card-img-wrap">${img}</div>
+          <button class="card-img-wrap" data-id="${d.id}" type="button" aria-label="פרטי ${esc(d.name)}">
+            ${img}
+            <span class="image-view-label">צפייה</span>
+          </button>
         </div>
       `;
     }
@@ -358,6 +372,12 @@
         btn.classList.add('added');
         btn.textContent = `✓ נבחרה (${selectedDishes[id].qty})`;
       }
+      const card = $(`.menu-card[data-id="${id}"]`);
+      if (card) {
+        card.classList.add('is-selected', 'selection-pop');
+        setTimeout(() => card.classList.remove('selection-pop'), 420);
+      }
+      updateDetailActionState();
     }
 
     function removeSelection(id, fully = false) {
@@ -370,6 +390,8 @@
           btn.classList.remove('added');
           btn.textContent = '+ הוסף לבחירות';
         }
+        const card = $(`.menu-card[data-id="${id}"]`);
+        if (card) card.classList.remove('is-selected');
       } else {
         selectedDishes[id].qty -= 1;
         const btn = $(`.add-to-order-btn[data-id="${id}"]`);
@@ -378,6 +400,7 @@
         }
       }
       updateOrderUI();
+      updateDetailActionState();
     }
 
     // Scroll & Intersection Interactions
@@ -468,16 +491,40 @@
     const lightboxClose = $('#lightboxClose');
     const lightboxTitle = $('#lightboxTitle');
     const lightboxDesc = $('#lightboxDesc');
+    const lightboxNote = $('#lightboxNote');
+    const lightboxPrice = $('#lightboxPrice');
+    const lightboxAddBtn = $('#lightboxAddBtn');
     const lightboxContent = $('#lightboxContent');
 
     let touchStartY = 0;
     let touchEndY = 0;
+    let activeLightboxDishId = null;
 
-    function openLightbox(src, alt, desc) {
-      lightboxImg.src = src;
-      lightboxImg.alt = alt;
-      lightboxTitle.textContent = alt;
-      lightboxDesc.textContent = desc || '';
+    function updateDetailActionState() {
+      if (!activeLightboxDishId) return;
+      const qty = selectedDishes[activeLightboxDishId]?.qty || 0;
+      lightboxAddBtn.textContent = qty ? `נבחרה (${qty}) · הוסף עוד` : 'הוסף לבחירות';
+      lightboxAddBtn.classList.toggle('added', qty > 0);
+    }
+
+    function openDishDetails(dish) {
+      activeLightboxDishId = dish.id;
+      if (dish.photo) {
+        lightboxImg.src = dish.photo;
+        lightboxImg.alt = dish.name;
+        lightboxImg.style.display = '';
+      } else {
+        lightboxImg.src = '';
+        lightboxImg.alt = '';
+        lightboxImg.style.display = 'none';
+      }
+      lightboxTitle.textContent = dish.name;
+      lightboxDesc.textContent = dish.desc || '';
+      lightboxNote.textContent = dish.note || '';
+      lightboxNote.style.display = dish.note ? '' : 'none';
+      lightboxPrice.textContent = dish.price || '';
+      lightboxPrice.style.display = dish.price ? '' : 'none';
+      updateDetailActionState();
       lightbox.classList.add('open');
       document.body.style.overflow = 'hidden';
       lightboxContent.style.transform = 'translateY(0)';
@@ -490,13 +537,22 @@
         lightboxImg.src = '';
         lightboxTitle.textContent = '';
         lightboxDesc.textContent = '';
+        lightboxNote.textContent = '';
+        lightboxPrice.textContent = '';
+        activeLightboxDishId = null;
       }, 300);
     }
 
-    // Clicks on images inside cards triggers lightbox
+    lightboxAddBtn.addEventListener('click', () => {
+      if (activeLightboxDishId) addSelection(activeLightboxDishId);
+    });
+
+    // Clicks on card images/details trigger dish details
     document.addEventListener('click', e => {
-      if (e.target.classList.contains('card-img') && e.target.src) {
-        openLightbox(e.target.src, e.target.alt, e.target.dataset.desc);
+      const detailsTrigger = e.target.closest('.card-img-wrap, .dish-details-btn');
+      if (detailsTrigger) {
+        const dish = allDishes.find(x => x.id === detailsTrigger.dataset.id);
+        if (dish) openDishDetails(dish);
       }
       
       // Add selection click delegate
