@@ -1,6 +1,6 @@
 {
-  "buildCommand": "",
-  "outputDirectory": ".",
+  "buildCommand": "node scripts/build-site.mjs",
+  "outputDirectory": "dist",
   "framework": null,
   "cleanUrls": true
 }

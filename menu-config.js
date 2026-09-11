@@ -13,9 +13,8 @@ export const firebaseConfig = {
   appId:             "1:236971012667:web:f5baccbfe484b44914a21e"
 };
 
-// The menu sections, in display order. The 'key' must match the
-// data-target on the nav buttons in index.html. To rename a section
-// heading, just edit its 'title' below.
+// Legacy section defaults used only until the admin saves the shared
+// menuSettings/config document. Manage names, visibility and order in admin.
 export const SECTIONS = [
   { key: "breakfast",  title: "ארוחות בוקר", short: "ארוחות בוקר" },
   { key: "salads",     title: "בלאנקו בטבע", short: "בטבע" },

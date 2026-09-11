@@ -1,0 +1,14 @@
+.local-preview
+.sites-runtime
+.agents
+node_modules
+tests
+Open Blanco.cmd
+start-preview.ps1
+preview-server.mjs
+preview.html
+LOCAL-REVIEW.md
+firestore.rules
+storage.rules
+firebase.json
+firebase-debug.log

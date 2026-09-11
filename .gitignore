@@ -8,3 +8,10 @@ desktop.ini
 .DS_Store
 
 .vercel
+
+# Local review data, browser checks and helper output
+.local-preview/
+.sites-runtime/
+node_modules/
+firebase-debug.log
+dist/

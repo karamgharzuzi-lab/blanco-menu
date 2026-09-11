@@ -2,16 +2,33 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Preserve the existing production administrator restriction.
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email == 'admin@blanco.com';
+    }
+
     // The menu. Anyone can READ it (customers). Only authenticated admins can write/change it.
     match /dishes/{id} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Ordered categories and menu revision, shared by the editor and public menu.
+    match /menuSettings/config {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Recovery copy of audited duplicate records, created during admin migration.
+    match /menuBackups/{id} {
+      allow read, write: if isAdmin();
     }
 
     // Visit tracking — anyone can CREATE a visit log (write-only, not readable by public). Only authenticated admins can read/manage.
     match /visits/{id} {
-      allow create: if true;
-      allow read, update, delete: if request.auth != null;
+      allow create: if request.resource.data.keys().hasOnly(['openedAt'])
+                    && request.resource.data.openedAt is timestamp;
+      allow read, update, delete: if isAdmin();
     }
   }
 }

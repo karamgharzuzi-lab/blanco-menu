@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>BLANCO — תפריט דיגיטלי</title>
   <link rel="stylesheet" href="index.css">
+  <script>if (location.protocol === 'file:') location.replace('preview.html');</script>
 </head>
 <body class="light-theme">
 
@@ -118,16 +119,16 @@
 
   <!-- App Logic Integrations -->
   <script type="module">
-    import { firebaseConfig, SECTIONS } from './menu-config.js';
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    import { loadMenu, trackVisit, subscribe, isPreview } from './menu-store.js';
+    import { ordered, dietaryFlag as checkDietary } from './menu-model.js';
+    let SECTIONS = [];
+    let menuObserver;
+    let interactionController;
+    const selectionKey = isPreview ? 'blanco_preview_selections' : 'blanco_selections';
 
     // Selections state (Local Storage mapping)
-    let selectedDishes = JSON.parse(localStorage.getItem('blanco_selections') || '{}');
+    let selectedDishes = {};
+    try { selectedDishes = JSON.parse(localStorage.getItem(selectionKey) || '{}'); } catch {}
     let allDishes = [];
 
     // Elements
@@ -149,29 +150,6 @@
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
-    }
-
-    // Parse and detect dietary flags from texts if not set explicitly
-    function checkDietary(dish, type) {
-      if (type === 'vegetarian') {
-        if (dish.isVegetarian !== undefined) return !!dish.isVegetarian;
-        const keywords = ['צמחוני', 'טבעוני', 'חלומי', 'גבינ', 'פטה', 'סלט', 'שקשוקה', 'קרואסון חמאה'];
-        return keywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
-      }
-      if (type === 'spicy') {
-        if (dish.isSpicy !== undefined) return !!dish.isSpicy;
-        const keywords = ['חריף', 'פיקנטי', 'צ׳ילי', 'סומאק', 'לבנה חריפה'];
-        return keywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
-      }
-      if (type === 'glutenfree') {
-        if (dish.isGlutenFree !== undefined) return !!dish.isGlutenFree;
-        const keywords = ['ללא גלוטן', 'סלמון', 'פילה אנגוס', 'קרפצ׳יו', 'פירות ים'];
-        // Pastas, bread, foccacias, schnitzels are generally not gluten free
-        const glutenKeywords = ['פסטה', 'לחם', 'ג׳בטה', 'קרואסון', 'שניצל', 'טוסט', 'קרוטונים', 'פוקצ׳ה'];
-        const matchesGluten = glutenKeywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
-        return !matchesGluten && keywords.some(k => (dish.name + ' ' + (dish.desc || '')).includes(k));
-      }
-      return false;
     }
 
     // Generate Single Card HTML
@@ -240,8 +218,11 @@
     // Render Full Menu Grid
     function renderMenu() {
       const mainRoot = $('#menuMain');
+      menuObserver?.disconnect();
+      interactionController?.abort();
       
       if (!allDishes.length) {
+        $('#navPills').innerHTML = '';
         mainRoot.innerHTML = `
           <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
             <p>אין מנות זמינות להצגה כרגע.</p>
@@ -251,7 +232,7 @@
       }
 
       // Group dishes by Section key
-      const grouped = {};
+      const grouped = Object.create(null);
       allDishes.forEach(d => {
         (grouped[d.section] = grouped[d.section] || []).push(d);
       });
@@ -346,7 +327,7 @@
       `;
 
       // Save state to Local Storage
-      localStorage.setItem('blanco_selections', JSON.stringify(selectedDishes));
+      localStorage.setItem(selectionKey, JSON.stringify(selectedDishes));
     }
 
     function addSelection(id) {
@@ -405,6 +386,8 @@
 
     // Scroll & Intersection Interactions
     function initInteractions() {
+      interactionController = new AbortController();
+      const signal = interactionController.signal;
       const nav = $('#stickyNav');
       const pills = $$('.nav-pill');
       const sections = $$('.menu-section');
@@ -430,7 +413,7 @@
         
         // Re-enable observer after smooth scroll completes
         setTimeout(() => {
-          sections.forEach(s => obs.observe(s));
+          if (menuObserver === obs && !signal.aborted) sections.forEach(s => obs.observe(s));
         }, 800);
       }));
 
@@ -467,6 +450,7 @@
         threshold: 0
       });
       
+      menuObserver = obs;
       sections.forEach(s => obs.observe(s));
 
       // Scroll event throttling
@@ -480,9 +464,9 @@
           scrollBtn.classList.toggle('visible', window.pageYOffset > 320);
           ticking = false;
         });
-      }, { passive: true });
+      }, { passive: true, signal });
 
-      scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+      scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }), { signal });
     }
 
     // Lightbox Details & Swipe Dismissals
@@ -689,20 +673,10 @@
     // Initial Database loading
     async function loadDishesData() {
       try {
-        // Track visit — writes timestamp asynchronously to visits collection
-        addDoc(collection(db, 'visits'), { openedAt: serverTimestamp() }).catch(err => console.log('Visits collection tracking ignored: ', err));
-
-        const snap = await getDocs(collection(db, 'dishes'));
-        allDishes = snap.docs.map(x => ({ id: x.id, ...x.data() }));
-        const activeDishes = allDishes.filter(x => !x.archived);
-        
-        // Replace skeleton screens with rendered menu
-        allDishes = activeDishes;
-        renderMenu();
+        applyMenu(await loadMenu());
       } catch (err) {
         console.error(err);
-        $('#menuRoot').className = 'menu-state';
-        $('#menuRoot').innerHTML = `
+        $('#menuMain').innerHTML = `
           <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
             <p>שגיאה בטעינת המנות. אנא בדוק את החיבור לרשת ונסה שוב.</p>
           </div>
@@ -710,6 +684,26 @@
       }
     }
     
+    function applyMenu(state) {
+      SECTIONS = ordered(state.sections).filter(s => !s.hidden);
+      const visibleKeys = new Set(SECTIONS.map(s => s.key));
+      allDishes = ordered(state.dishes.filter(d => !d.archived && visibleKeys.has(d.section)));
+      const nextSelections = {};
+      for (const dish of allDishes) {
+        if (selectedDishes[dish.id]) nextSelections[dish.id] = { ...selectedDishes[dish.id], name: dish.name, price: dish.price, photo: dish.photo };
+      }
+      selectedDishes = nextSelections;
+      renderMenu();
+      updateOrderUI();
+    }
+    if (isPreview) {
+      const bar = document.createElement('div');
+      bar.className = 'local-preview-bar';
+      bar.innerHTML = '<span>תצוגה מקומית · עותק לבדיקה בלבד</span><a href="admin.html">ניהול התפריט ↗</a>';
+      document.body.prepend(bar);
+    }
+    subscribe(applyMenu);
+    trackVisit().catch(error => console.info('Visit tracking unavailable:', error.code));
     // Kick off load
     loadDishesData();
   </script>
